@@ -1,5 +1,5 @@
 // Faith Personal service worker: app works offline after the first open.
-const CACHE = 'faith-personal-v2';
+const CACHE = 'faith-personal-v3';
 const CORE = ['./', './index.html', './manifest.json', './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png'];
 
 self.addEventListener('install', e => {

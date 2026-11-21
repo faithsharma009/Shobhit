@@ -378,7 +378,7 @@
   const writeStore = (o) => { try { localStorage.setItem(STORE, JSON.stringify(o)); } catch { toast('Save nahi hua — storage full hai', true); } };
   async function deriveKey(pass, s) {
     const base = await crypto.subtle.importKey('raw', enc.encode(pass), 'PBKDF2', false, ['deriveKey']);
-    return crypto.subtle.deriveKey({ name: 'PBKDF2', salt: s, iterations: 310000, hash: 'SHA-256' }, base, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']);
+    return crypto.subtle.deriveKey({ name: 'PBKDF2', salt: s, iterations: 310000, hash: 'SHA-256' }, base, { name: 'AES-GCM', length: 256 }, true, ['encrypt', 'decrypt']);
   }
   async function encryptObj(obj) {
     const iv = crypto.getRandomValues(new Uint8Array(12));
@@ -388,6 +388,23 @@
   const decryptObj = async (blob, k) => JSON.parse(dec.decode(await crypto.subtle.decrypt({ name: 'AES-GCM', iv: unb64(blob.iv) }, k, unb64(blob.ct))));
   async function save() { const prev = readStore() || {}; writeStore({ ...(await encryptObj(data)), email: prev.email, remember: prev.remember }); }
   function setMeta(patch) { const s = readStore(); if (s) writeStore({ ...s, ...patch }); }
+  // ---- Auto login: remember the unlock key on this device so the app opens straight to Home ----
+  const AUTO = 'faithPersonal.auto', LOCKPREF = 'faithPersonal.lock';
+  const lockOn = () => { try { return localStorage.getItem(LOCKPREF) === '1'; } catch { return false; } };
+  async function rememberKey() {
+    if (lockOn() || !key) return;
+    try { localStorage.setItem(AUTO, b64(await crypto.subtle.exportKey('raw', key))); } catch {}
+  }
+  function forgetKey() { try { localStorage.removeItem(AUTO); } catch {} }
+  async function tryAutoLogin() {
+    if (lockOn()) return false;
+    let raw; try { raw = localStorage.getItem(AUTO); } catch { return false; }
+    const s = readStore(); if (!raw || !s) return false;
+    try {
+      const k = await crypto.subtle.importKey('raw', unb64(raw), { name: 'AES-GCM' }, true, ['encrypt', 'decrypt']);
+      data = normalise(await decryptObj(s, k)); key = k; salt = unb64(s.salt); return true;
+    } catch { forgetKey(); return false; }
+  }
   function normalise(d) {
     d.passwords ||= []; d.trades ||= []; d.savings ||= []; d.expenses ||= []; d.trackers ||= [];
     d.trades.forEach(t => { if (!t.platform) t.platform = t.symbol || 'Other'; delete t.symbol; });
@@ -469,6 +486,7 @@
         key = k; salt = unb64(s.salt); data = normalise(d);
         setMeta({ email, remember: $('aRemember').checked });
       }
+      await rememberKey();
       show('main'); go('home'); bump();
     } finally { $('authBtn').disabled = false; }
   }
@@ -483,10 +501,10 @@
     try { localStorage.removeItem(STORE); } catch {}
     openAuth();
   };
-  $('lockBtn').onclick = openAuth;
+  $('lockBtn').onclick = () => { forgetKey(); openAuth(); };
 
   let idle;
-  const bump = () => { clearTimeout(idle); if (key) idle = setTimeout(() => { openAuth(); toast('Auto lock ho gaya', true); }, 5 * 60 * 1000); };
+  const bump = () => { clearTimeout(idle); if (key && lockOn()) idle = setTimeout(() => { openAuth(); toast('Auto lock ho gaya', true); }, 5 * 60 * 1000); };
   ['click', 'keydown', 'touchstart', 'scroll'].forEach(ev => document.addEventListener(ev, bump, { passive: true }));
 
   // ================= ROUTER =================
@@ -519,6 +537,7 @@
     $('pageTitle').textContent = title;
     const f = afterFns; afterFns = []; f.forEach(fn => fn());
     $('bellDot').classList.toggle('hidden', !needsAttention());
+    $('lockBtn').classList.toggle('hidden', !lockOn());
   }
 
   // ================= HOME =================
@@ -878,13 +897,14 @@
       <div class="list">
         <button id="exportBtn"><span class="badge b-blue">${ic('download')}</span>Backup Download<span class="chev">${ic('chev')}</span></button>
         <button id="importBtn"><span class="badge b-blue">${ic('upload')}</span>Backup Restore<span class="chev">${ic('chev')}</span></button>
+        <button id="lockToggle"><span class="badge b-brand">${ic('shield')}</span><span>App kholte waqt Password<div style="color:var(--muted);font-size:12.5px;font-weight:500;margin-top:2px">${lockOn() ? 'ON — har baar password maangega' : 'OFF — seedha Home khulta hai'}</div></span><span class="chev" style="color:${lockOn() ? 'var(--green)' : 'var(--dim)'};font-weight:800;font-size:13px">${lockOn() ? 'ON' : 'OFF'}</span></button>
         <button id="changePwBtn"><span class="badge b-brand">${ic('lock')}</span>Password Badlo<span class="chev">${ic('chev')}</span></button>
       </div>
       <div class="list" style="margin-top:12px">
         <button id="logoutBtn"><span class="badge b-amber">${ic('logout')}</span>Logout</button>
         <button id="wipeBtn"><span class="badge b-red">${ic('trash')}</span><span class="red">Saara Data Delete Karo</span></button>
       </div>
-      <p class="note">5 minute kuch na karo to app khud lock ho jaata hai.<br>Phone badalne ya app uninstall karne se pehle Backup zaroor lo.</p>
+      <p class="note">${lockOn() ? '5 minute kuch na karo to app khud lock ho jaata hai.<br>' : 'Phone ka screen lock lagaye rakho, kyunki app bina password ke khulta hai.<br>'}Phone badalne ya app uninstall karne se pehle Backup zaroor lo.</p>
     </div>`;
   }
   document.addEventListener('click', e => {
@@ -893,7 +913,8 @@
     else if (id === 'exportBtn') exportBackup();
     else if (id === 'importBtn') $('importFile').click();
     else if (id === 'changePwBtn') changePw();
-    else if (id === 'logoutBtn') openAuth();
+    else if (id === 'logoutBtn') logout();
+    else if (id === 'lockToggle') toggleLock();
     else if (id === 'wipeBtn') wipeAll();
   });
   function trackerForm(t) {
@@ -994,7 +1015,7 @@
     const s = unb64(blob.salt), k = await deriveKey(p, s);
     let d; try { d = normalise(await decryptObj(blob, k)); } catch { return toast('Galat password', true); }
     if (!await ask({ title: 'Restore karna hai?', text: `Backup mein ${d.trades.length} trades, ${d.savings.length} savings, ${d.expenses.length} kharche, ${d.passwords.length} passwords aur ${d.trackers.length} trackers hain.<br>Abhi ka data replace ho jayega.`, ok: 'Restore' })) return;
-    data = d; key = k; salt = s; await save(); render(); toast('Restore ho gaya ✓');
+    data = d; key = k; salt = s; await save(); forgetKey(); await rememberKey(); render(); toast('Restore ho gaya ✓');
   };
   function changePw() {
     sheet(`<h3>Password Badlo</h3>
@@ -1008,22 +1029,37 @@
         if ($('cNew').value.length < 6) return toast('Kam se kam 6 characters', true);
         if ($('cNew').value !== $('cNew2').value) return toast('Naye password match nahi kar rahe', true);
         salt = crypto.getRandomValues(new Uint8Array(16)); key = await deriveKey($('cNew').value, salt);
-        await save(); closeLayer(); toast('Password badal gaya ✓');
+        await save(); forgetKey(); await rememberKey(); closeLayer(); toast('Password badal gaya ✓');
       };
     });
+  }
+  async function toggleLock() {
+    if (lockOn()) {
+      try { localStorage.removeItem(LOCKPREF); } catch {}
+      await rememberKey(); toast('Ab app seedha Home pe khulega ✓');
+    } else {
+      if (!await ask({ title: 'Password lock ON karna hai?', text: 'Har baar app kholne pe password maangega, aur 5 minute baad app khud lock ho jayega.', ok: 'ON karo' })) return render();
+      try { localStorage.setItem(LOCKPREF, '1'); } catch {}
+      forgetKey(); bump(); toast('Password lock ON ✓');
+    }
+    render();
+  }
+  async function logout() {
+    if (!await ask({ title: 'Logout karna hai?', text: 'Agli baar app kholne pe aapka password maangega.', ok: 'Logout' })) return;
+    forgetKey(); openAuth();
   }
   async function wipeAll() {
     if (!await ask({ title: 'Saara data delete karna hai?', text: 'Trading, saving, kharcha, passwords aur trackers — sab hamesha ke liye delete ho jayega.', ok: 'Haan, delete', danger: true })) return;
     const c = await ask({ title: 'Last confirm', text: 'Confirm karne ke liye <b>DELETE</b> likho.', input: { placeholder: 'DELETE' }, ok: 'Delete', danger: true });
     if (c !== 'DELETE') return toast('Delete cancel ho gaya');
     try { localStorage.removeItem(STORE); } catch {}
-    openAuth();
+    forgetKey(); openAuth();
   }
 
   // ================= BOOT =================
   if (!window.crypto || !crypto.subtle) {
     document.body.innerHTML = '<div style="padding:40px 20px;text-align:center">Ye browser secure encryption support nahi karta.<br>Chrome ya Safari ka latest version use karo.</div>';
-  } else show('splash');
+  } else tryAutoLogin().then(ok => { if (ok) { show('main'); go('home'); } else show('splash'); });
   if ('serviceWorker' in navigator && location.protocol.startsWith('http') && !window.Capacitor) navigator.serviceWorker.register('sw.js').catch(() => {});
 })();
 </script>
