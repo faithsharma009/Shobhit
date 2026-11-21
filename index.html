@@ -210,7 +210,7 @@
   .legend i { display: inline-block; width: 11px; height: 11px; border-radius: 3px; margin-right: 5px; vertical-align: -1px; }
 
   nav.tabs { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; display: flex; background: rgba(17,12,31,.97); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-top: 1px solid var(--line); padding: 6px 6px calc(6px + env(safe-area-inset-bottom)); z-index: 6; }
-  nav.tabs button { flex: 1; background: none; border: 0; color: var(--dim); display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 11.5px; font-weight: 650; padding: 6px 0 4px; position: relative; }
+  nav.tabs button { flex: 1; min-width: 0; background: none; border: 0; color: var(--dim); display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 11px; font-weight: 650; padding: 6px 0 4px; position: relative; }
   nav.tabs button svg.i { width: 23px; height: 23px; }
   nav.tabs button.active { color: var(--brand3); }
   nav.tabs button.active::before { content: ""; position: absolute; top: -7px; width: 28px; height: 3px; border-radius: 0 0 3px 3px; background: var(--brand2); }
@@ -299,6 +299,7 @@
   <nav class="tabs">
     <button data-tab="home" class="active"><svg class="i" data-ic="home"></svg>Home</button>
     <button data-tab="trading"><svg class="i" data-ic="trend"></svg>Trading</button>
+    <button data-tab="withdraw"><svg class="i" data-ic="withdraw"></svg>Withdrawal</button>
     <button data-tab="vault"><svg class="i" data-ic="key"></svg>Passwords</button>
     <button data-tab="more"><svg class="i" data-ic="grid"></svg>More</button>
   </nav>
@@ -338,6 +339,8 @@
     trash: '<path d="M4.5 7h15M9.5 7V4.5h5V7M6.5 7l1 13h9l1-13"/>',
     chev: '<path d="M9 5l7 7-7 7"/>',
     dice: '<rect x="4" y="4" width="16" height="16" rx="4"/><circle cx="9" cy="9" r="1"/><circle cx="15" cy="15" r="1"/><circle cx="15" cy="9" r="1"/><circle cx="9" cy="15" r="1"/>',
+    withdraw: '<rect x="3" y="7" width="18" height="13" rx="3"/><path d="M12 16V3M8 7l4-4 4 4"/><path d="M7 13.5h1M16 13.5h1"/>',
+    bank: '<path d="M3 9.5L12 4l9 5.5"/><path d="M5 10v8M9.5 10v8M14.5 10v8M19 10v8M3.5 20.5h17"/>',
     cal: '<rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/>'
   };
   const SVGA = 'viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"';
@@ -349,6 +352,7 @@
   const STORE = 'faithPersonal.v1';
   const PLATFORMS = ['Quotex', 'Binomo', 'Olymp Trade', 'IQ Option', 'Zerodha', 'Groww', 'Angel One', 'Upstox', 'Dhan'];
   const SAVE_CATS = ['Bank', 'FD / RD', 'SIP / Mutual Fund', 'Gold', 'Cash', 'Emergency Fund', 'Other'];
+  const WD_METHODS = ['Bank', 'UPI', 'Crypto / USDT', 'Card', 'Cash', 'Other'];
   const EXP_CATS = ['Khana', 'Travel', 'Shopping', 'Bills', 'Rent', 'Health', 'Padhai', 'Mobile / Net', 'Family', 'Other'];
   const enc = new TextEncoder(), dec = new TextDecoder();
   const $ = (id) => document.getElementById(id);
@@ -406,7 +410,7 @@
     } catch { forgetKey(); return false; }
   }
   function normalise(d) {
-    d.passwords ||= []; d.trades ||= []; d.savings ||= []; d.expenses ||= []; d.trackers ||= [];
+    d.passwords ||= []; d.trades ||= []; d.savings ||= []; d.expenses ||= []; d.trackers ||= []; d.withdrawals ||= [];
     d.trades.forEach(t => { if (!t.platform) t.platform = t.symbol || 'Other'; delete t.symbol; });
     d.trackers.forEach(t => { t.done ||= {}; });
     return d;
@@ -510,7 +514,7 @@
   // ================= ROUTER =================
   // route: 'home' | 'trading' | 'vault' | 'more' | 'ledger:saving' | 'ledger:expense' | 'tracker:<id>'
   let route = 'home';
-  const ui = { tradeView: 'daily', tradeMonth: null, tradePlat: 'all', ledgerMonth: {}, vq: '' };
+  const ui = { wdMonth: null, tradeView: 'daily', tradeMonth: null, tradePlat: 'all', ledgerMonth: {}, vq: '' };
   function go(r) {
     route = r; closeLayer();
     const tab = r.startsWith('ledger') ? 'home' : r.startsWith('tracker') ? 'more' : r;
@@ -530,6 +534,7 @@
     afterFns = [];
     if (route === 'home') v.innerHTML = homeHTML();
     else if (route === 'trading') { title = 'Trading'; v.innerHTML = tradingHTML(); }
+    else if (route === 'withdraw') { title = 'Withdrawal'; v.innerHTML = withdrawHTML(); }
     else if (route === 'vault') { title = 'Passwords'; v.innerHTML = vaultHTML(); }
     else if (route === 'more') { title = 'More'; v.innerHTML = moreHTML(); }
     else if (route.startsWith('ledger:')) { const k = route.split(':')[1]; title = k === 'saving' ? 'Saving' : 'Kharcha'; v.innerHTML = ledgerHTML(k); }
@@ -819,6 +824,82 @@
     });
   }
 
+  // ================= WITHDRAWAL =================
+  function withdrawHTML() {
+    const all = data.withdrawals, ym = thisYM();
+    const total = sum(all), mon = sum(all.filter(x => x.date.startsWith(ym))), profit = sum(data.trades);
+    const months = [...new Set([ym, ...all.map(x => x.date.slice(0, 7))])].sort().reverse();
+    if (!ui.wdMonth || (ui.wdMonth !== 'all' && !months.includes(ui.wdMonth))) ui.wdMonth = ym;
+    const list = all.filter(x => ui.wdMonth === 'all' || x.date.startsWith(ui.wdMonth)).sort(byNewest);
+    const bp = {}; list.forEach(x => { bp[x.platform] = (bp[x.platform] || 0) + +x.amount; });
+    const plats = Object.entries(bp).sort((a, b) => b[1] - a[1]), max = plats[0] ? plats[0][1] : 1;
+    const byDay = {}; list.forEach(x => (byDay[x.date] ||= []).push(x));
+    const pct = profit > 0 ? Math.min(100, Math.round(total / profit * 100)) : 0;
+    later(() => { $('wMonth').onchange = e => { ui.wdMonth = e.target.value; render(); }; });
+    return `<div class="page">
+      <div class="hero" style="margin-top:4px;background:radial-gradient(120% 120% at 100% 0%,#0ea5e9 0%,#0369a1 40%,#0c2a52 100%);box-shadow:0 16px 36px rgba(3,105,161,.35)">
+        <div class="lbl" style="color:#d6eefc">Total Withdrawal</div>
+        <div class="big num">${money(total)}</div>
+        <div class="sub num" style="color:#d6eefc">Is mahine ${money(mon)}</div>
+        <div class="hero-stats" style="background:rgba(2,12,30,.42)">
+          <div><small style="color:#cfe7f7">Withdrawals</small><b class="num">${all.length}</b></div>
+          <div><small style="color:#cfe7f7">Trading Profit</small><b class="num">${short(profit)}</b></div>
+          <div><small style="color:#cfe7f7">Profit se nikala</small><b class="num">${profit > 0 ? pct + '%' : '—'}</b></div>
+        </div>
+      </div>
+      <button class="btn" style="margin-top:14px;background:linear-gradient(135deg,#0284c7,#38bdf8);box-shadow:0 10px 24px rgba(2,132,199,.3)" data-wd-add>${ic('plus')} Withdrawal Add Karo</button>
+      <div class="filters"><select class="fctl" id="wMonth"><option value="all" ${ui.wdMonth === 'all' ? 'selected' : ''}>Saare mahine</option>${months.map(m => `<option value="${m}" ${m === ui.wdMonth ? 'selected' : ''}>${monthName(m)}</option>`).join('')}</select></div>
+      ${plats.length ? `<div class="sec"><h3>Platform-wise Withdrawal</h3></div>
+      <div class="panel bars">${plats.map(([c, v]) => `<div class="brow"><div class="bl"><span>${esc(c)}</span><span class="num">${money(v)}</span></div><div class="track"><div class="fill" style="width:${Math.max(3, v / max * 100)}%;background:var(--blue)"></div></div></div>`).join('')}</div>` : ''}
+      <div class="sec"><h3>History</h3>${list.length ? `<span class="num" style="color:var(--muted);font-size:13px">${list.length} · ${money(sum(list))}</span>` : ''}</div>
+      ${list.length ? Object.keys(byDay).map(d => `<div class="dayh"><span>${fmtDay(d)}</span><b class="num">${money(sum(byDay[d]))}</b></div><div class="panel">${byDay[d].map(wdRow).join('')}</div>`).join('')
+        : `<div class="empty">Is mahine koi withdrawal nahi.<br>Upar button dabake withdrawal likho.</div>`}
+    </div>`;
+  }
+  const wdRow = (x) => `<button class="tx" data-wid="${x.id}"><span class="badge b-blue">${ic('withdraw')}</span>
+      <div class="mid"><div class="t1">${esc(x.platform)} <span style="color:var(--muted);font-weight:500">→ ${esc(x.method)}</span></div><div class="t2">${x.notes ? esc(x.notes) + ' · ' : ''}${fmtDate(x.date)}</div></div>
+      <div class="amt num" style="color:var(--blue)">₹${(+x.amount).toLocaleString('en-IN', { maximumFractionDigits: 2 })}</div></button>`;
+  document.addEventListener('click', e => {
+    if (e.target.closest('[data-wd-add]')) return wdForm(null);
+    const r = e.target.closest('[data-wid]'); if (r) wdForm(data.withdrawals.find(x => x.id === r.dataset.wid));
+  });
+  function wdForm(w) {
+    let method = w?.method || WD_METHODS[0];
+    const methods = WD_METHODS.includes(method) ? WD_METHODS : [method, ...WD_METHODS];
+    const lastW = [...data.withdrawals].sort((a, b) => (b.created || 0) - (a.created || 0))[0];
+    const cur = w?.platform || (lastW ? lastW.platform : lastPlatform());
+    const plats = [...new Set([cur, ...data.trades.map(x => x.platform), ...data.withdrawals.map(x => x.platform), ...PLATFORMS].filter(Boolean))];
+    sheet(`<h3>${w ? 'Withdrawal Edit Karo' : 'Withdrawal Add Karo'}</h3>
+      <label class="l">Amount (₹)</label><input class="fctl amt-in num" id="wAmt" type="number" inputmode="decimal" min="0" step="0.01" placeholder="0" value="${w ? +w.amount : ''}">
+      <label class="l">Kis platform se nikala</label><select class="fctl" id="wPlat">${plats.map(p => `<option ${p === cur ? 'selected' : ''}>${esc(p)}</option>`).join('')}<option value="__other">+ Other (khud likho)</option></select>
+      <input class="fctl hidden" id="wPlatNew" style="margin-top:8px" placeholder="Platform ka naam likho">
+      <label class="l">Kahan aaya</label><div class="cats" id="wMeth">${methods.map(c => `<button type="button" data-c="${esc(c)}">${esc(c)}</button>`).join('')}</div>
+      <label class="l">Date</label><input class="fctl" type="date" id="wDate" value="${esc(w?.date || todayStr())}">
+      <label class="l">Note (optional)</label><input class="fctl" id="wNote" placeholder="Jaise: SBI account mein" value="${esc(w?.notes)}">
+      <div class="btns">${w ? '<button class="btn danger" id="wDel">Delete</button>' : '<button class="btn ghost" data-close>Cancel</button>'}<button class="btn" id="wSave">Save</button></div>`, () => {
+      const ms = $('wMeth');
+      const paint = () => ms.querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.c === method));
+      ms.onclick = (e) => { const b = e.target.closest('button'); if (b) { method = b.dataset.c; paint(); } }; paint();
+      const sel = $('wPlat');
+      sel.onchange = () => { const o = sel.value === '__other'; $('wPlatNew').classList.toggle('hidden', !o); if (o) $('wPlatNew').focus(); };
+      $('wSave').onclick = async () => {
+        const amt = parseFloat($('wAmt').value);
+        if (isNaN(amt) || amt <= 0) { toast('Amount daalo', true); return $('wAmt').focus(); }
+        if (!$('wDate').value) return toast('Date chuno', true);
+        let platform = sel.value;
+        if (platform === '__other') { platform = $('wPlatNew').value.trim(); if (!platform) { toast('Platform ka naam likho', true); return $('wPlatNew').focus(); } }
+        const rec = { date: $('wDate').value, amount: amt, platform, method, notes: $('wNote').value.trim() };
+        if (w) Object.assign(w, rec); else data.withdrawals.push({ id: uid(), created: Date.now(), ...rec });
+        await save(); closeLayer(); render(); toast('Withdrawal save ho gaya ✓');
+      };
+      if (w) $('wDel').onclick = async () => {
+        if (!await ask({ title: 'Withdrawal delete karna hai?', text: `${money(+w.amount)} · ${esc(w.platform)} · ${fmtDate(w.date)}`, ok: 'Delete', danger: true })) return;
+        data.withdrawals = data.withdrawals.filter(x => x.id !== w.id); await save(); render(); toast('Delete ho gaya');
+      };
+      if (!w) setTimeout(() => $('wAmt').focus(), 120);
+    });
+  }
+
   // ================= PASSWORDS =================
   const BRAND = [['gmail', '#ea4335'], ['google', '#4285f4'], ['insta', '#d62976'], ['facebook', '#1877f2'], ['whatsapp', '#25d366'], ['twitter', '#1d9bf0'], ['youtube', '#ff0000'], ['snap', '#ca8a04'], ['linkedin', '#0a66c2'], ['paytm', '#00baf2'], ['phonepe', '#5f259f'], ['amazon', '#f59e0b'], ['flipkart', '#2874f0'], ['netflix', '#e50914'], ['telegram', '#229ed9'], ['quotex', '#16a34a'], ['binomo', '#2563eb'], ['zerodha', '#387ed1'], ['groww', '#00b386'], ['bank', '#0f766e'], ['upi', '#7c3aed']];
   const avColor = (s) => { const n = (s || '').toLowerCase(); const b = BRAND.find(([k]) => n.includes(k)); if (b) return b[1]; let h = 0; for (const c of n) h = (h * 31 + c.charCodeAt(0)) % 360; return `hsl(${h} 50% 42%)`; };
@@ -1013,7 +1094,7 @@
     if (p == null) return;
     const s = unb64(blob.salt), k = await deriveKey(p, s);
     let d; try { d = normalise(await decryptObj(blob, k)); } catch { return toast('Galat password', true); }
-    if (!await ask({ title: 'Restore karna hai?', text: `Backup mein ${d.trades.length} trades, ${d.savings.length} savings, ${d.expenses.length} kharche, ${d.passwords.length} passwords aur ${d.trackers.length} trackers hain.<br>Abhi ka data replace ho jayega.`, ok: 'Restore' })) return;
+    if (!await ask({ title: 'Restore karna hai?', text: `Backup mein ${d.trades.length} trades, ${d.withdrawals.length} withdrawals, ${d.savings.length} savings, ${d.expenses.length} kharche, ${d.passwords.length} passwords aur ${d.trackers.length} trackers hain.<br>Abhi ka data replace ho jayega.`, ok: 'Restore' })) return;
     data = d; key = k; salt = s; await save(); forgetKey(); await rememberKey(); render(); toast('Restore ho gaya ✓');
   };
   function changePw() {
