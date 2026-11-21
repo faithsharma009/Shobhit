@@ -3,427 +3,775 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#0f172a">
+<meta name="theme-color" content="#0b0716">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Faith Personal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #0f172a; --card: #1e293b; --card2: #273449; --text: #e2e8f0; --muted: #94a3b8;
-    --accent: #6366f1; --accent2: #818cf8; --green: #22c55e; --red: #ef4444; --border: #334155;
+    --bg: #0b0716; --bg2: #120c22; --card: #17112a; --card2: #211938; --line: #2c2347;
+    --text: #f4f1ff; --muted: #9a92b8; --dim: #6d658a;
+    --p1: #7c3aed; --p2: #a855f7; --p3: #c084fc;
+    --green: #22c55e; --red: #ef4444; --gold: #facc15;
   }
-  * { box-sizing: border-box; }
-  body { margin: 0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
-  .wrap { max-width: 720px; margin: 0 auto; padding: 16px 16px 90px; }
-  h1 { font-size: 22px; margin: 8px 0 16px; }
-  h2 { font-size: 18px; margin: 0 0 12px; }
-  .card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 16px; margin-bottom: 12px; }
-  label { display: block; font-size: 13px; color: var(--muted); margin: 10px 0 4px; }
-  input, textarea, select { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 16px; }
-  textarea { min-height: 60px; resize: vertical; }
-  button { cursor: pointer; border: 0; border-radius: 10px; padding: 12px 16px; font-size: 15px; font-weight: 600; background: var(--accent); color: #fff; }
-  button.ghost { background: var(--card2); color: var(--text); }
-  button.danger { background: var(--red); }
-  button.small { padding: 7px 10px; font-size: 13px; }
-  .row { display: flex; gap: 8px; align-items: center; }
-  .row > * { flex: 1; }
-  .between { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
-  .muted { color: var(--muted); font-size: 13px; }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; background: var(--bg); color: var(--text); font-family: Poppins, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  body { min-height: 100vh; overflow-x: hidden; }
+  button { font-family: inherit; cursor: pointer; }
+  input, select, textarea { font-family: inherit; }
   .hidden { display: none !important; }
-  .center { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 16px; }
-  .login { width: 100%; max-width: 380px; text-align: center; }
-  .logo { width: 64px; height: 64px; border-radius: 18px; background: linear-gradient(135deg, var(--accent), #ec4899); display: inline-flex; align-items: center; justify-content: center; font-size: 30px; font-weight: 800; margin-bottom: 8px; }
-  .err { color: var(--red); font-size: 14px; min-height: 20px; margin-top: 8px; }
-  .item { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; margin-bottom: 8px; }
-  .item .title { font-weight: 700; font-size: 16px; }
-  .field { display: flex; align-items: center; gap: 6px; margin-top: 6px; font-family: ui-monospace, monospace; font-size: 14px; word-break: break-all; }
-  .field span.val { flex: 1; }
-  .tabs { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card); border-top: 1px solid var(--border); display: flex; padding-bottom: env(safe-area-inset-bottom); }
-  .tabs button { flex: 1; background: none; color: var(--muted); border-radius: 0; padding: 14px 4px; }
-  .tabs button.active { color: var(--accent2); }
-  .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px; }
-  .stat { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 12px; text-align: center; }
-  .stat .n { font-size: 18px; font-weight: 800; margin-top: 4px; }
-  .pos { color: var(--green); } .neg { color: var(--red); }
-  .day { margin: 14px 0 6px; font-size: 13px; color: var(--muted); display: flex; justify-content: space-between; }
-  .modal { position: fixed; inset: 0; background: rgba(0,0,0,.6); display: flex; align-items: flex-end; justify-content: center; z-index: 10; }
-  .modal .card { width: 100%; max-width: 560px; margin: 0; border-radius: 18px 18px 0 0; max-height: 92vh; overflow: auto; padding-bottom: calc(16px + env(safe-area-inset-bottom)); }
-  .toast { position: fixed; top: 16px; left: 50%; transform: translateX(-50%); background: var(--green); color: #052e16; padding: 10px 16px; border-radius: 10px; font-weight: 700; z-index: 20; }
-  .seg { display: flex; gap: 6px; }
-  .seg button { flex: 1; background: var(--card2); color: var(--text); }
-  .seg button.on.p { background: var(--green); color: #052e16; }
-  .seg button.on.l { background: var(--red); }
-  @media (max-width: 420px) { .stat .n { font-size: 15px; } }
+  .screen { min-height: 100vh; max-width: 480px; margin: 0 auto; position: relative; }
+
+  /* ---------- Splash ---------- */
+  #splash { display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 0 0 calc(32px + env(safe-area-inset-bottom)); overflow: hidden;
+    background: radial-gradient(120% 60% at 50% 0%, #2a1155 0%, var(--bg) 60%); }
+  .splash-top { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 48px 16px 0; }
+  .splash-top svg.logo { width: 132px; height: 132px; filter: drop-shadow(0 10px 30px rgba(168,85,247,.45)); }
+  .brand { font-size: 46px; font-weight: 800; line-height: 1.05; margin-top: 18px; letter-spacing: -.5px; }
+  .brand span { display: block; background: linear-gradient(90deg, var(--p2), var(--p3)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .tagline { color: #d4cdf0; margin-top: 14px; font-size: 15px; letter-spacing: .5px; }
+  .wave { width: 100%; height: 170px; display: block; }
+  .btn { width: 100%; border: 0; border-radius: 999px; padding: 15px 20px; font-size: 16px; font-weight: 600; color: #fff;
+    background: linear-gradient(90deg, var(--p1), var(--p2)); box-shadow: 0 8px 24px rgba(124,58,237,.35); }
+  .btn:active { transform: scale(.98); }
+  .btn.ghost { background: var(--card2); box-shadow: none; }
+  .btn.danger { background: #3a1420; color: #fca5a5; box-shadow: none; }
+  .btn[disabled] { opacity: .6; }
+  .splash-btn { width: calc(100% - 32px); }
+
+  /* ---------- Auth ---------- */
+  #auth { padding: 64px 20px 32px; background: radial-gradient(100% 40% at 50% 0%, #1f0d40 0%, var(--bg) 70%); }
+  #auth h1 { font-size: 28px; margin: 0; font-weight: 700; }
+  #auth .sub { color: var(--muted); margin: 6px 0 28px; font-size: 15px; }
+  .inp { display: flex; align-items: center; gap: 12px; background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 0 14px; margin-bottom: 14px; transition: border-color .15s; }
+  .inp:focus-within { border-color: var(--p2); }
+  .inp svg { width: 20px; height: 20px; flex: 0 0 auto; color: var(--muted); }
+  .inp input { flex: 1; min-width: 0; background: none; border: 0; outline: 0; color: var(--text); font-size: 16px; padding: 16px 0; }
+  .eye { background: none; border: 0; color: var(--muted); padding: 6px; display: flex; }
+  .auth-row { display: flex; justify-content: space-between; align-items: center; margin: 4px 0 24px; font-size: 14px; }
+  .check { display: flex; align-items: center; gap: 8px; color: #d4cdf0; cursor: pointer; }
+  .check input { width: 18px; height: 18px; accent-color: var(--p1); margin: 0; }
+  .link { background: none; border: 0; color: var(--p3); font-size: 14px; padding: 0; }
+  .err { color: #f87171; min-height: 22px; font-size: 14px; margin-top: 12px; text-align: center; }
+  .note { color: var(--dim); font-size: 13px; text-align: center; margin-top: 22px; line-height: 1.6; }
+
+  /* ---------- App shell ---------- */
+  #main { padding-bottom: calc(84px + env(safe-area-inset-bottom)); }
+  header.top { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; padding: calc(12px + env(safe-area-inset-top)) 16px 12px; background: rgba(11,7,22,.88); backdrop-filter: blur(10px); }
+  header.top h2 { margin: 0; font-size: 18px; font-weight: 600; }
+  .icon-btn { width: 40px; height: 40px; border-radius: 12px; border: 0; background: transparent; color: var(--text); display: flex; align-items: center; justify-content: center; position: relative; }
+  .icon-btn svg { width: 24px; height: 24px; }
+  .dot { position: absolute; top: 8px; right: 9px; width: 8px; height: 8px; border-radius: 50%; background: var(--p2); }
+  .page { padding: 4px 16px 16px; }
+  .sec-title { display: flex; justify-content: space-between; align-items: center; margin: 22px 0 12px; }
+  .sec-title h3 { margin: 0; font-size: 17px; font-weight: 600; }
+
+  .hero { border-radius: 20px; padding: 18px 18px 0; background: linear-gradient(135deg, #6d28d9 0%, #4c1d95 55%, #2e1065 100%); box-shadow: 0 12px 32px rgba(109,40,217,.35); overflow: hidden; position: relative; }
+  .hero .lbl { font-size: 15px; color: #e9ddff; }
+  .hero .big { font-size: 34px; font-weight: 700; margin-top: 2px; letter-spacing: -.5px; }
+  .hero svg.spark { position: absolute; right: 14px; top: 18px; width: 110px; height: 56px; }
+  .hero-stats { display: grid; grid-template-columns: repeat(3, 1fr); margin: 16px -18px 0; background: rgba(10,4,25,.45); }
+  .hero-stats div { text-align: center; padding: 12px 4px; }
+  .hero-stats div + div { border-left: 1px solid rgba(255,255,255,.1); }
+  .hero-stats small { display: block; color: #cfc3f0; font-size: 12px; }
+  .hero-stats b { font-size: 17px; font-weight: 600; }
+
+  .pos { color: var(--green) !important; } .neg { color: var(--red) !important; }
+
+  .form-card { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 6px 14px 14px; }
+  .frow { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 0; }
+  .frow > label { color: #d4cdf0; font-size: 14px; flex: 0 0 96px; }
+  .fctl { flex: 1; min-width: 0; background: var(--card2); border: 1px solid transparent; border-radius: 12px; color: var(--text); font-size: 15px; padding: 11px 12px; outline: 0; width: 100%; }
+  .fctl:focus { border-color: var(--p2); }
+  select.fctl { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23c4b5fd' stroke-width='2' fill='none'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 32px; }
+  input[type=date].fctl { color-scheme: dark; }
+  .pl { display: flex; gap: 6px; flex: 1; min-width: 0; }
+  .pl .sign { flex: 0 0 auto; display: flex; background: var(--card2); border-radius: 12px; padding: 3px; }
+  .pl .sign button { border: 0; background: none; color: var(--muted); font-weight: 700; font-size: 16px; width: 36px; border-radius: 9px; }
+  .pl .sign button.on.p { background: var(--green); color: #052e16; }
+  .pl .sign button.on.l { background: var(--red); color: #fff; }
+  .pl input { min-width: 0; }
+
+  .tx { display: flex; align-items: center; gap: 12px; background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; margin-bottom: 8px; cursor: pointer; }
+  .tx .arrow { width: 30px; height: 30px; flex: 0 0 auto; }
+  .tx .mid { flex: 1; min-width: 0; }
+  .tx .amt { font-size: 17px; font-weight: 700; }
+  .tx .plat { color: var(--muted); font-size: 13px; }
+  .tx .right { text-align: right; font-size: 13px; }
+  .tx .right .d { color: #d4cdf0; }
+  .tx .right .n { color: var(--muted); max-width: 130px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .empty { background: var(--card); border: 1px dashed var(--line); border-radius: 14px; padding: 22px 16px; text-align: center; color: var(--muted); font-size: 14px; }
+  .day-h { display: flex; justify-content: space-between; color: var(--muted); font-size: 13px; margin: 16px 2px 8px; }
+
+  .filters { display: flex; gap: 8px; margin-bottom: 8px; }
+  .filters select { flex: 1; }
+  .sum-line { color: var(--muted); font-size: 13px; margin: 6px 2px 0; }
+
+  .tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .tile { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 14px; }
+  .tile small { color: var(--muted); font-size: 12px; display: block; }
+  .tile b { font-size: 20px; font-weight: 700; display: block; margin-top: 4px; }
+  .tile span { color: var(--dim); font-size: 12px; }
+  .chart-card { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 14px; position: relative; }
+  .chart-card svg { width: 100%; height: 200px; display: block; overflow: visible; }
+  .tip { position: absolute; pointer-events: none; background: #0b0716; border: 1px solid var(--line); border-radius: 10px; padding: 6px 10px; font-size: 12px; white-space: nowrap; transform: translate(-50%, -110%); z-index: 3; }
+  table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
+  .tbl th { text-align: left; color: var(--muted); font-weight: 500; font-size: 12px; padding: 0 6px 8px; }
+  .tbl td { padding: 10px 6px; border-top: 1px solid var(--line); }
+  .tbl td:last-child, .tbl th:last-child { text-align: right; }
+  .tbl td:nth-child(2), .tbl th:nth-child(2) { text-align: center; }
+
+  .profile-head { display: flex; align-items: center; gap: 14px; background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 16px; }
+  .avatar { width: 56px; height: 56px; border-radius: 50%; background: linear-gradient(135deg, var(--p1), #db2777); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 22px; flex: 0 0 auto; }
+  .menu-list { background: var(--card); border: 1px solid var(--line); border-radius: 18px; overflow: hidden; margin-top: 14px; }
+  .menu-list button { width: 100%; display: flex; align-items: center; gap: 14px; padding: 15px 16px; background: none; border: 0; color: var(--text); font-size: 15px; text-align: left; }
+  .menu-list button + button { border-top: 1px solid var(--line); }
+  .menu-list button .ic { width: 36px; height: 36px; border-radius: 10px; background: var(--card2); display: flex; align-items: center; justify-content: center; font-size: 17px; }
+  .menu-list button .chev { margin-left: auto; color: var(--dim); }
+  .menu-list button.red { color: #f87171; }
+
+  .vault-item { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; margin-bottom: 8px; }
+  .vault-item .t { display: flex; justify-content: space-between; align-items: center; font-weight: 600; }
+  .vf { display: flex; align-items: center; gap: 6px; margin-top: 6px; font-size: 14px; color: #d4cdf0; word-break: break-all; }
+  .vf .v { flex: 1; font-family: ui-monospace, Menlo, monospace; }
+  .chip { border: 0; background: var(--card2); color: var(--text); border-radius: 8px; padding: 6px 10px; font-size: 12px; font-weight: 500; }
+
+  nav.tabs { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; display: flex; background: rgba(18,12,34,.96); backdrop-filter: blur(10px); border-top: 1px solid var(--line); padding: 6px 4px calc(6px + env(safe-area-inset-bottom)); z-index: 6; }
+  nav.tabs button { flex: 1; background: none; border: 0; color: var(--muted); display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: 12px; padding: 6px 0; }
+  nav.tabs button svg { width: 24px; height: 24px; }
+  nav.tabs button.active { color: var(--p3); }
+
+  .sheet-bg { position: fixed; inset: 0; background: rgba(0,0,0,.6); z-index: 20; display: flex; align-items: flex-end; justify-content: center; }
+  .sheet { width: 100%; max-width: 480px; background: var(--bg2); border: 1px solid var(--line); border-bottom: 0; border-radius: 22px 22px 0 0; padding: 18px 16px calc(18px + env(safe-area-inset-bottom)); max-height: 92vh; overflow: auto; }
+  .sheet h3 { margin: 0 0 12px; font-size: 18px; }
+  .sheet .grab { width: 40px; height: 4px; border-radius: 4px; background: var(--line); margin: -6px auto 14px; }
+  .sheet label.l { display: block; color: var(--muted); font-size: 13px; margin: 12px 0 6px; }
+  .sheet .btns { display: flex; gap: 8px; margin-top: 18px; }
+  .sheet .btns .btn { flex: 1; }
+  .sheet p { color: #d4cdf0; font-size: 14px; line-height: 1.6; }
+
+  .drawer-bg { position: fixed; inset: 0; background: rgba(0,0,0,.55); z-index: 15; }
+  .drawer { position: fixed; top: 0; bottom: 0; left: 0; width: 78%; max-width: 300px; background: var(--bg2); border-right: 1px solid var(--line); z-index: 16; padding: calc(24px + env(safe-area-inset-top)) 12px 24px; }
+  .drawer .menu-list { margin-top: 18px; }
+
+  .toast { position: fixed; top: calc(16px + env(safe-area-inset-top)); left: 50%; transform: translateX(-50%); background: var(--green); color: #052e16; padding: 10px 18px; border-radius: 999px; font-weight: 600; z-index: 40; font-size: 14px; white-space: nowrap; box-shadow: 0 8px 20px rgba(0,0,0,.4); }
 </style>
 </head>
 <body>
 
-<!-- LOCK SCREEN -->
-<div id="lock" class="center">
-  <div class="login card">
-    <div class="logo">F</div>
-    <h1>Faith Personal</h1>
-    <p class="muted" id="lockMsg">Master password daalo</p>
-    <input id="mp1" type="password" placeholder="Master password" autocomplete="current-password">
-    <input id="mp2" type="password" placeholder="Master password dobara likho" class="hidden" style="margin-top:8px" autocomplete="new-password">
-    <button id="unlockBtn" style="width:100%;margin-top:12px">Unlock</button>
-    <div class="err" id="lockErr"></div>
-    <p class="muted" id="setupNote" class="hidden"></p>
-  </div>
-</div>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <linearGradient id="gP" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#c084fc"/><stop offset="1" stop-color="#6d28d9"/></linearGradient>
+    <linearGradient id="gWave" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7c3aed" stop-opacity=".55"/><stop offset="1" stop-color="#7c3aed" stop-opacity="0"/></linearGradient>
+    <linearGradient id="gSpark" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#c084fc" stop-opacity=".3"/><stop offset="1" stop-color="#f0abfc"/></linearGradient>
+    <symbol id="i-up" viewBox="0 0 24 24"><path d="M12 3l8 9h-5v9H9v-9H4z" fill="#22c55e"/></symbol>
+    <symbol id="i-down" viewBox="0 0 24 24"><path d="M12 21l-8-9h5V3h6v9h5z" fill="#ef4444"/></symbol>
+  </defs>
+</svg>
 
-<!-- APP -->
-<div id="app" class="hidden">
-  <div class="wrap">
-    <div class="between">
-      <h1>Faith Personal</h1>
-      <button class="ghost small" id="lockNow">🔒 Lock</button>
+<!-- ============ SPLASH ============ -->
+<section id="splash" class="screen">
+  <div class="splash-top">
+    <svg class="logo" viewBox="0 0 120 120" aria-label="Faith Personal logo">
+      <path d="M34 18 H96 L86 38 H52 L48 50 H80 L71 68 H42 L30 102 H8 Z" fill="url(#gP)"/>
+      <path d="M58 92 C78 86 92 72 100 50" stroke="url(#gP)" stroke-width="9" fill="none" stroke-linecap="round"/>
+      <path d="M88 44 L106 36 L108 56 Z" fill="#c084fc"/>
+    </svg>
+    <div class="brand">Faith<span>Personal</span></div>
+    <div class="tagline">Track • Record • Grow</div>
+  </div>
+  <svg class="wave" viewBox="0 0 400 170" preserveAspectRatio="none" aria-hidden="true">
+    <path d="M0 140 C40 120 70 90 110 105 S170 150 210 110 S270 60 300 80 S350 70 400 20 L400 170 L0 170 Z" fill="url(#gWave)"/>
+    <path d="M0 140 C40 120 70 90 110 105 S170 150 210 110 S270 60 300 80 S350 70 380 30" stroke="#a855f7" stroke-width="3" fill="none"/>
+    <path d="M366 26 L392 14 L388 42 Z" fill="#a855f7"/>
+  </svg>
+  <button class="btn splash-btn" id="getStarted">Get Started &nbsp;→</button>
+</section>
+
+<!-- ============ AUTH ============ -->
+<section id="auth" class="screen hidden">
+  <h1 id="authTitle">Welcome Back 👋</h1>
+  <p class="sub" id="authSub">Login to continue</p>
+  <div class="inp">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>
+    <input id="aEmail" type="email" placeholder="Gmail address" autocomplete="username" autocapitalize="off">
+  </div>
+  <div class="inp">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 018 0v3"/></svg>
+    <input id="aPass" type="password" placeholder="Password" autocomplete="current-password">
+    <button class="eye" type="button" data-eye="aPass" aria-label="Show password"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button>
+  </div>
+  <div class="inp hidden" id="aPass2Wrap">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 018 0v3"/></svg>
+    <input id="aPass2" type="password" placeholder="Confirm password" autocomplete="new-password">
+  </div>
+  <div class="auth-row">
+    <label class="check"><input type="checkbox" id="aRemember" checked> Remember Me</label>
+    <button class="link" id="forgotBtn" type="button">Forgot Password?</button>
+  </div>
+  <button class="btn" id="authBtn">Login</button>
+  <div class="err" id="authErr"></div>
+  <p class="note" id="authNote">🔒 Aapka data sirf is phone mein, encrypt hokar save hota hai.</p>
+</section>
+
+<!-- ============ MAIN ============ -->
+<section id="main" class="screen hidden">
+  <header class="top">
+    <button class="icon-btn" id="menuBtn" aria-label="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+    <h2 id="pageTitle">Faith Personal</h2>
+    <button class="icon-btn" id="bellBtn" aria-label="Notifications"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 16V11a6 6 0 1112 0v5l2 2H4z"/><path d="M10 20a2 2 0 004 0"/></svg><span class="dot hidden" id="bellDot"></span></button>
+  </header>
+
+  <!-- HOME -->
+  <div class="page" id="p-home">
+    <div class="hero">
+      <div class="lbl">Total Profit</div>
+      <div class="big" id="hTotal">₹0</div>
+      <svg class="spark" id="hSpark" viewBox="0 0 110 56" preserveAspectRatio="none" aria-hidden="true"></svg>
+      <div class="hero-stats">
+        <div><small>Total Trades</small><b id="hTrades">0</b></div>
+        <div><small>Win Rate</small><b id="hWin">0%</b></div>
+        <div><small>This Month</small><b id="hMonth">₹0</b></div>
+      </div>
     </div>
 
-    <!-- PASSWORDS -->
-    <section id="tab-pw">
-      <div class="row" style="margin-bottom:12px">
-        <input id="pwSearch" placeholder="🔍 Search (Gmail, Instagram...)">
-        <button style="flex:0 0 auto" id="addPw">+ Add</button>
-      </div>
-      <div id="pwList"></div>
-    </section>
+    <div class="sec-title"><h3>Add Trading Record</h3></div>
+    <div class="form-card" id="quickForm"></div>
+    <button class="btn" id="qSave" style="margin-top:14px">Save Record</button>
 
-    <!-- TRADING -->
-    <section id="tab-tr" class="hidden">
-      <div class="stats">
-        <div class="stat"><div class="muted">Aaj</div><div class="n" id="sToday">₹0</div></div>
-        <div class="stat"><div class="muted">Is Mahine</div><div class="n" id="sMonth">₹0</div></div>
-        <div class="stat"><div class="muted">Total</div><div class="n" id="sTotal">₹0</div></div>
-      </div>
-      <div class="row" style="margin-bottom:4px">
-        <select id="trMonth"></select>
-        <button style="flex:0 0 auto" id="addTr">+ Add Trade</button>
-      </div>
-      <div id="trList"></div>
-    </section>
+    <div class="sec-title"><h3>Recent Activity</h3><button class="link" data-go="history">View All →</button></div>
+    <div id="recent"></div>
+  </div>
 
-    <!-- SETTINGS -->
-    <section id="tab-set" class="hidden">
-      <div class="card">
-        <h2>Backup</h2>
-        <p class="muted">Backup file encrypted hoti hai — sirf aapke master password se khulegi. Phone change karne se pehle backup zaroor lo.</p>
-        <div class="row">
-          <button id="exportBtn">⬇ Backup Download</button>
-          <button class="ghost" id="importBtn">⬆ Restore</button>
-        </div>
-        <input type="file" id="importFile" accept=".json,application/json" class="hidden">
-      </div>
-      <div class="card">
-        <h2>Master Password Badlo</h2>
-        <input id="newMp1" type="password" placeholder="Naya master password" autocomplete="new-password">
-        <input id="newMp2" type="password" placeholder="Dobara likho" style="margin-top:8px" autocomplete="new-password">
-        <button style="margin-top:10px;width:100%" id="changeMp">Change</button>
-      </div>
-      <div class="card">
-        <h2>Security</h2>
-        <p class="muted">• Saara data AES-256 se encrypt hota hai, sirf isi device pe save hota hai.<br>
-        • 5 minute kuch na karo to app khud lock ho jaata hai.<br>
-        • Master password bhool gaye to data wapas nahi milega — use yaad rakhna.</p>
-        <button class="danger" id="wipeBtn" style="width:100%">Saara Data Delete Karo</button>
-      </div>
-    </section>
+  <!-- HISTORY -->
+  <div class="page hidden" id="p-history">
+    <div class="filters">
+      <select class="fctl" id="fMonth"></select>
+      <select class="fctl" id="fPlat"></select>
+    </div>
+    <div class="sum-line" id="hSum"></div>
+    <div id="histList"></div>
+  </div>
+
+  <!-- STATS -->
+  <div class="page hidden" id="p-stats">
+    <div class="filters"><select class="fctl" id="sMonth"></select></div>
+    <div class="tiles" id="sTiles"></div>
+    <div class="sec-title"><h3>Daily Profit / Loss</h3></div>
+    <div class="chart-card" id="chartCard"><svg id="chart" role="img" aria-label="Daily profit and loss bar chart"></svg><div class="tip hidden" id="tip"></div></div>
+    <div class="sec-title"><h3>Platform-wise</h3></div>
+    <div class="chart-card"><table class="tbl" id="platTbl"></table></div>
+  </div>
+
+  <!-- PROFILE -->
+  <div class="page hidden" id="p-profile">
+    <div class="profile-head">
+      <div class="avatar" id="avatar">F</div>
+      <div style="min-width:0"><div style="font-weight:600;font-size:17px">Faith Personal</div>
+        <div style="color:var(--muted);font-size:14px;word-break:break-all" id="profEmail"></div></div>
+    </div>
+    <div class="menu-list">
+      <button data-go="vault"><span class="ic">🔑</span>Mere Passwords<span class="chev">›</span></button>
+      <button id="exportBtn"><span class="ic">⬇️</span>Backup Download<span class="chev">›</span></button>
+      <button id="importBtn"><span class="ic">⬆️</span>Backup Restore<span class="chev">›</span></button>
+      <button id="changePwBtn"><span class="ic">🔐</span>Password Badlo<span class="chev">›</span></button>
+    </div>
+    <div class="menu-list">
+      <button id="logoutBtn"><span class="ic">🚪</span>Logout</button>
+      <button id="wipeBtn" class="red"><span class="ic">🗑️</span>Saara Data Delete Karo</button>
+    </div>
+    <p class="note">5 minute kuch na karo to app khud logout ho jaata hai.<br>Phone badalne se pehle Backup zaroor lo.</p>
+    <input type="file" id="importFile" accept=".json,application/json" class="hidden">
+  </div>
+
+  <!-- VAULT -->
+  <div class="page hidden" id="p-vault">
+    <div class="filters">
+      <div class="inp" style="flex:1;margin:0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><input id="vSearch" placeholder="Search (Gmail, Instagram...)" style="padding:12px 0"></div>
+    </div>
+    <button class="btn" id="vAdd" style="margin:6px 0 14px">+ Naya Password Add Karo</button>
+    <div id="vList"></div>
   </div>
 
   <nav class="tabs">
-    <button data-tab="pw" class="active">🔑<br>Passwords</button>
-    <button data-tab="tr">📈<br>Trading</button>
-    <button data-tab="set">⚙️<br>Settings</button>
+    <button data-go="home" class="active"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3l9 8h-3v9h-5v-6h-2v6H6v-9H3z"/></svg>Home</button>
+    <button data-go="history"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>History</button>
+    <button data-go="stats"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 20h16M7 16v-4M11 16V8M15 16v-6M19 16V5"/></svg>Stats</button>
+    <button data-go="profile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/></svg>Profile</button>
   </nav>
-</div>
+</section>
 
-<div id="modalRoot"></div>
+<div id="layer"></div>
 
 <script>
 (() => {
+  'use strict';
   const STORE = 'faithPersonal.v1';
+  const PLATFORMS = ['Quotex', 'Binomo', 'Olymp Trade', 'IQ Option', 'Zerodha', 'Groww', 'Angel One', 'Upstox', 'Dhan'];
   const enc = new TextEncoder(), dec = new TextDecoder();
   const $ = (id) => document.getElementById(id);
   const b64 = (buf) => btoa(String.fromCharCode(...new Uint8Array(buf)));
   const unb64 = (s) => Uint8Array.from(atob(s), c => c.charCodeAt(0));
-  const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  const uid = () => crypto.randomUUID ? crypto.randomUUID() : Date.now() + '' + Math.random();
-  const todayStr = () => { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); };
-  const money = (n) => (n < 0 ? '-' : '') + '₹' + Math.abs(n).toLocaleString('en-IN', { maximumFractionDigits: 2 });
+  const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const uid = () => (crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2));
+  const todayStr = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
+  const money = (n, sign) => (n < 0 ? '- ' : (sign && n > 0 ? '+ ' : '')) + '₹' + Math.abs(n).toLocaleString('en-IN', { maximumFractionDigits: 2 });
+  const cls = (n) => n > 0 ? 'pos' : n < 0 ? 'neg' : '';
+  const sum = (a) => a.reduce((s, t) => s + (+t.amount || 0), 0);
+  const fmtDate = (d) => new Date(d + 'T00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+  const monthName = (ym) => { const [y, m] = ym.split('-'); return new Date(+y, +m - 1, 1).toLocaleString('en-IN', { month: 'long', year: 'numeric' }); };
 
   let key = null, salt = null, data = null;
 
-  function readStore() { try { return JSON.parse(localStorage.getItem(STORE)); } catch { return null; } }
-  function writeStore(obj) { try { localStorage.setItem(STORE, JSON.stringify(obj)); return true; } catch { alert('Save nahi hua — storage full ya blocked hai.'); return false; } }
-
-  async function deriveKey(pass, saltBytes) {
+  // ---------- storage + crypto ----------
+  const readStore = () => { try { return JSON.parse(localStorage.getItem(STORE)); } catch { return null; } };
+  const writeStore = (o) => { try { localStorage.setItem(STORE, JSON.stringify(o)); } catch { alert('Save nahi hua — phone ki storage full ya blocked hai.'); } };
+  async function deriveKey(pass, s) {
     const base = await crypto.subtle.importKey('raw', enc.encode(pass), 'PBKDF2', false, ['deriveKey']);
-    return crypto.subtle.deriveKey({ name: 'PBKDF2', salt: saltBytes, iterations: 310000, hash: 'SHA-256' },
-      base, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']);
+    return crypto.subtle.deriveKey({ name: 'PBKDF2', salt: s, iterations: 310000, hash: 'SHA-256' }, base, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']);
   }
-  async function encryptObj(obj, k, s) {
+  async function encryptObj(obj) {
     const iv = crypto.getRandomValues(new Uint8Array(12));
-    const ct = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, k, enc.encode(JSON.stringify(obj)));
-    return { v: 1, salt: b64(s), iv: b64(iv), ct: b64(ct) };
+    const ct = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, enc.encode(JSON.stringify(obj)));
+    return { v: 2, salt: b64(salt), iv: b64(iv), ct: b64(ct) };
   }
-  async function decryptObj(blob, k) {
-    const pt = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: unb64(blob.iv) }, k, unb64(blob.ct));
-    return JSON.parse(dec.decode(pt));
-  }
-  async function save() { writeStore(await encryptObj(data, key, salt)); }
+  const decryptObj = async (blob, k) => JSON.parse(dec.decode(await crypto.subtle.decrypt({ name: 'AES-GCM', iv: unb64(blob.iv) }, k, unb64(blob.ct))));
+  async function save() { const prev = readStore() || {}; writeStore({ ...(await encryptObj(data)), email: prev.email, remember: prev.remember }); }
+  function setMeta(patch) { const s = readStore(); if (s) writeStore({ ...s, ...patch }); }
 
-  function toast(msg) {
+  function normalise(d) {
+    d.passwords ||= []; d.trades ||= [];
+    d.trades.forEach(t => { if (!t.platform) t.platform = t.symbol || 'Other'; delete t.symbol; });
+    return d;
+  }
+
+  function toast(msg, bad) {
     const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg;
-    document.body.appendChild(t); setTimeout(() => t.remove(), 1600);
+    if (bad) { t.style.background = '#ef4444'; t.style.color = '#fff'; }
+    document.body.appendChild(t); setTimeout(() => t.remove(), 1700);
+  }
+  function show(id) { ['splash', 'auth', 'main'].forEach(s => $(s).classList.toggle('hidden', s !== id)); window.scrollTo(0, 0); }
+
+  // ---------- splash / auth ----------
+  const isNew = () => !readStore();
+  $('getStarted').onclick = openAuth;
+
+  function openAuth() {
+    key = null; data = null; $('layer').innerHTML = '';
+    const s = readStore();
+    $('aPass').value = ''; $('aPass2').value = ''; $('authErr').textContent = '';
+    if (isNew()) {
+      $('authTitle').textContent = 'Create Account ✨';
+      $('authSub').textContent = 'Apni Gmail aur ek strong password set karo';
+      $('aPass2Wrap').classList.remove('hidden'); $('forgotBtn').classList.add('hidden');
+      $('authBtn').textContent = 'Sign Up'; $('aEmail').value = '';
+      $('aPass').autocomplete = 'new-password';
+    } else {
+      $('authTitle').textContent = 'Welcome Back 👋';
+      $('authSub').textContent = 'Login to continue';
+      $('aPass2Wrap').classList.add('hidden'); $('forgotBtn').classList.remove('hidden');
+      $('authBtn').textContent = 'Login';
+      $('aEmail').value = s.remember !== false && s.email ? s.email : '';
+      $('aRemember').checked = s.remember !== false;
+      $('aPass').autocomplete = 'current-password';
+    }
+    show('auth');
+    setTimeout(() => ($('aEmail').value ? $('aPass') : $('aEmail')).focus(), 80);
   }
 
-  // ---------- LOCK / UNLOCK ----------
-  const isNew = () => !readStore();
-  function showLock() {
-    key = null; data = null;
-    $('app').classList.add('hidden'); $('lock').classList.remove('hidden');
-    $('modalRoot').innerHTML = '';
-    $('mp1').value = ''; $('mp2').value = ''; $('lockErr').textContent = '';
-    if (isNew()) {
-      $('lockMsg').textContent = 'Pehli baar? Ek strong master password banao. Yahi password app kholne ke liye lagega.';
-      $('mp2').classList.remove('hidden'); $('unlockBtn').textContent = 'Create';
-    } else {
-      $('lockMsg').textContent = 'Master password daalo';
-      $('mp2').classList.add('hidden'); $('unlockBtn').textContent = 'Unlock';
-    }
-    setTimeout(() => $('mp1').focus(), 50);
-  }
-  async function unlock() {
-    const p = $('mp1').value; $('lockErr').textContent = '';
-    if (!p) { $('lockErr').textContent = 'Password daalo'; return; }
-    $('unlockBtn').disabled = true;
+  async function doAuth() {
+    const email = $('aEmail').value.trim().toLowerCase(), pass = $('aPass').value;
+    const err = (m) => { $('authErr').textContent = m; };
+    err('');
+    if (!/^\S+@\S+\.\S+$/.test(email)) return err('Sahi Gmail address daalo');
+    if (!pass) return err('Password daalo');
+    $('authBtn').disabled = true;
     try {
       if (isNew()) {
-        if (p.length < 6) { $('lockErr').textContent = 'Kam se kam 6 characters'; return; }
-        if (p !== $('mp2').value) { $('lockErr').textContent = 'Dono password match nahi kar rahe'; return; }
-        salt = crypto.getRandomValues(new Uint8Array(16));
-        key = await deriveKey(p, salt);
+        if (pass.length < 6) return err('Password kam se kam 6 characters ka ho');
+        if (pass !== $('aPass2').value) return err('Dono password match nahi kar rahe');
+        salt = crypto.getRandomValues(new Uint8Array(16)); key = await deriveKey(pass, salt);
         data = { passwords: [], trades: [] };
-        await save();
+        writeStore({ ...(await encryptObj(data)), email, remember: $('aRemember').checked });
       } else {
-        const blob = readStore();
-        salt = unb64(blob.salt);
-        key = await deriveKey(p, salt);
-        try { data = await decryptObj(blob, key); }
-        catch { key = null; $('lockErr').textContent = 'Galat password'; return; }
-        data.passwords ||= []; data.trades ||= [];
+        const s = readStore();
+        if (s.email && s.email !== email) return err('Ye Gmail is app mein registered nahi hai');
+        const k = await deriveKey(pass, unb64(s.salt));
+        let d; try { d = await decryptObj(s, k); } catch { return err('Galat password'); }
+        key = k; salt = unb64(s.salt); data = normalise(d);
+        setMeta({ email, remember: $('aRemember').checked });
       }
-      $('lock').classList.add('hidden'); $('app').classList.remove('hidden');
-      renderAll(); bumpIdle();
-    } finally { $('unlockBtn').disabled = false; }
+      enterApp();
+    } finally { $('authBtn').disabled = false; }
   }
-  $('unlockBtn').onclick = unlock;
-  ['mp1', 'mp2'].forEach(id => $(id).addEventListener('keydown', e => { if (e.key === 'Enter') unlock(); }));
-  $('lockNow').onclick = showLock;
-
-  let idleTimer;
-  function bumpIdle() { clearTimeout(idleTimer); if (key) idleTimer = setTimeout(showLock, 5 * 60 * 1000); }
-  ['click', 'keydown', 'touchstart', 'scroll'].forEach(ev => document.addEventListener(ev, bumpIdle, { passive: true }));
-
-  // ---------- TABS ----------
-  document.querySelectorAll('.tabs button').forEach(b => b.onclick = () => {
-    document.querySelectorAll('.tabs button').forEach(x => x.classList.toggle('active', x === b));
-    ['pw', 'tr', 'set'].forEach(t => $('tab-' + t).classList.toggle('hidden', t !== b.dataset.tab));
+  $('authBtn').onclick = doAuth;
+  ['aEmail', 'aPass', 'aPass2'].forEach(id => $(id).addEventListener('keydown', e => { if (e.key === 'Enter') doAuth(); }));
+  document.querySelectorAll('[data-eye]').forEach(b => b.onclick = () => { const i = $(b.dataset.eye); i.type = i.type === 'password' ? 'text' : 'password'; });
+  $('forgotBtn').onclick = () => sheet(`
+    <h3>Password bhool gaye?</h3>
+    <p>Aapka data aapke password se hi lock (encrypt) hota hai, isliye bina password ke koi bhi use khol nahi sakta — main bhi nahi. Isliye password recover nahi ho sakta.</p>
+    <p>Agar aapke paas <b>backup file</b> hai aur uska password yaad hai, to naya account bana ke Profile → Backup Restore se data wapas la sakte ho.</p>
+    <div class="btns"><button class="btn ghost" data-close>Theek hai</button><button class="btn danger" id="resetAll">Sab delete karke naya shuru</button></div>`, () => {
+    $('resetAll').onclick = () => {
+      if (prompt('Saara data hamesha ke liye delete hoga. Confirm karne ke liye DELETE likho') !== 'DELETE') return;
+      try { localStorage.removeItem(STORE); } catch {}
+      closeLayer(); openAuth();
+    };
   });
 
-  function renderAll() { renderPw(); renderTr(); }
+  let idle;
+  const bump = () => { clearTimeout(idle); if (key) idle = setTimeout(() => { openAuth(); toast('Auto logout ho gaya', true); }, 5 * 60 * 1000); };
+  ['click', 'keydown', 'touchstart', 'scroll'].forEach(ev => document.addEventListener(ev, bump, { passive: true }));
 
-  // ---------- MODAL ----------
-  function modal(html, onMount) {
-    $('modalRoot').innerHTML = `<div class="modal"><div class="card">${html}</div></div>`;
-    const m = $('modalRoot').firstChild;
-    m.addEventListener('click', e => { if (e.target === m) closeModal(); });
-    onMount && onMount(m);
+  // ---------- navigation ----------
+  const TITLES = { home: 'Faith Personal', history: 'History', stats: 'Stats', profile: 'Profile', vault: 'Mere Passwords' };
+  let page = 'home';
+  function go(p) {
+    page = p; closeLayer();
+    Object.keys(TITLES).forEach(k => $('p-' + k).classList.toggle('hidden', k !== p));
+    document.querySelectorAll('nav.tabs button').forEach(b => b.classList.toggle('active', b.dataset.go === (p === 'vault' ? 'profile' : p)));
+    $('pageTitle').textContent = TITLES[p];
+    render(); window.scrollTo(0, 0);
   }
-  const closeModal = () => { $('modalRoot').innerHTML = ''; };
+  document.addEventListener('click', e => { const g = e.target.closest('[data-go]'); if (g) go(g.dataset.go); });
 
-  // ---------- PASSWORDS ----------
-  function renderPw() {
-    const q = $('pwSearch').value.trim().toLowerCase();
-    const list = data.passwords
-      .filter(p => !q || [p.site, p.user, p.notes].some(x => (x || '').toLowerCase().includes(q)))
-      .sort((a, b) => (a.site || '').localeCompare(b.site || ''));
-    if (!data.passwords.length) {
-      $('pwList').innerHTML = `<div class="card muted">Abhi koi password save nahi hai. <b>+ Add</b> dabao aur apna pehla account daalo (jaise Gmail).</div>`;
-      return;
-    }
-    $('pwList').innerHTML = list.map(p => `
-      <div class="item" data-id="${p.id}">
-        <div class="between"><div class="title">${esc(p.site) || '(No name)'}</div>
-          <button class="ghost small" data-act="edit">Edit</button></div>
-        ${p.user ? `<div class="field"><span class="val">${esc(p.user)}</span><button class="ghost small" data-act="cu">Copy</button></div>` : ''}
-        <div class="field"><span class="val" data-pw>••••••••</span>
-          <button class="ghost small" data-act="show">👁</button>
-          <button class="ghost small" data-act="cp">Copy</button></div>
-        ${p.notes ? `<div class="muted" style="margin-top:6px">${esc(p.notes)}</div>` : ''}
-      </div>`).join('') || `<div class="muted">Kuch nahi mila</div>`;
+  function enterApp() { show('main'); buildQuickForm(); go('home'); bump(); }
+
+  function render() {
+    renderHome();
+    if (page === 'history') renderHistory();
+    if (page === 'stats') renderStats();
+    if (page === 'profile') renderProfile();
+    if (page === 'vault') renderVault();
   }
-  $('pwSearch').oninput = renderPw;
-  $('pwList').onclick = async (e) => {
-    const btn = e.target.closest('button'); if (!btn) return;
-    const item = btn.closest('.item'); const p = data.passwords.find(x => x.id === item.dataset.id);
-    const act = btn.dataset.act;
-    if (act === 'edit') return pwForm(p);
-    if (act === 'show') { const s = item.querySelector('[data-pw]'); const shown = s.textContent !== '••••••••'; s.textContent = shown ? '••••••••' : p.pass; btn.textContent = shown ? '👁' : '🙈'; }
-    if (act === 'cp' || act === 'cu') {
-      try { await navigator.clipboard.writeText(act === 'cp' ? p.pass : p.user); toast('Copied!'); }
-      catch { prompt('Copy karo:', act === 'cp' ? p.pass : p.user); }
-    }
+
+  // ---------- layers (sheet / drawer) ----------
+  function closeLayer() { $('layer').innerHTML = ''; }
+  function sheet(html, mount) {
+    $('layer').innerHTML = `<div class="sheet-bg"><div class="sheet"><div class="grab"></div>${html}</div></div>`;
+    const bg = $('layer').firstChild;
+    bg.addEventListener('click', e => { if (e.target === bg || e.target.closest('[data-close]')) closeLayer(); });
+    mount && mount(bg);
+  }
+  $('menuBtn').onclick = () => {
+    $('layer').innerHTML = `<div class="drawer-bg"></div><div class="drawer">
+      <div style="display:flex;align-items:center;gap:10px;padding:0 6px">
+        <svg width="40" height="40" viewBox="0 0 120 120"><path d="M34 18 H96 L86 38 H52 L48 50 H80 L71 68 H42 L30 102 H8 Z" fill="url(#gP)"/><path d="M58 92 C78 86 92 72 100 50" stroke="url(#gP)" stroke-width="9" fill="none" stroke-linecap="round"/><path d="M88 44 L106 36 L108 56 Z" fill="#c084fc"/></svg>
+        <div style="font-weight:700;font-size:18px">Faith Personal</div></div>
+      <div class="menu-list">
+        <button data-go="home"><span class="ic">🏠</span>Home</button>
+        <button data-go="history"><span class="ic">🕘</span>History</button>
+        <button data-go="stats"><span class="ic">📊</span>Stats</button>
+        <button data-go="vault"><span class="ic">🔑</span>Mere Passwords</button>
+        <button data-go="profile"><span class="ic">👤</span>Profile</button>
+      </div>
+      <div class="menu-list"><button id="dLogout"><span class="ic">🚪</span>Logout</button></div></div>`;
+    $('layer').querySelector('.drawer-bg').onclick = closeLayer;
+    $('dLogout').onclick = openAuth;
   };
-  $('addPw').onclick = () => pwForm(null);
+  $('bellBtn').onclick = () => {
+    const t = todayStr(), today = data.trades.filter(x => x.date === t);
+    sheet(`<h3>🔔 Aaj ka Update</h3>
+      ${today.length
+        ? `<p>Aaj aapne <b>${today.length}</b> record likhe. Aaj ka total: <b class="${cls(sum(today))}">${money(sum(today), 1)}</b></p>`
+        : `<p>Aaj ka trading record abhi tak nahi likha. Home pe jaake <b>Save Record</b> karo.</p>`}
+      <div class="btns"><button class="btn" data-close>OK</button></div>`);
+  };
 
-  function genPass() {
-    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%&*?';
-    const r = crypto.getRandomValues(new Uint32Array(16));
-    return Array.from(r, n => chars[n % chars.length]).join('');
+  // ---------- platform select ----------
+  function platformOptions(selected) {
+    const used = [...new Set(data.trades.map(t => t.platform).filter(Boolean))];
+    const all = [...new Set([...PLATFORMS, ...used])];
+    const sel = selected && !all.includes(selected) ? [...all, selected] : all;
+    return sel.map(p => `<option ${p === selected ? 'selected' : ''}>${esc(p)}</option>`).join('') + `<option value="__other">+ Other (khud likho)</option>`;
   }
-  function pwForm(p) {
-    modal(`
-      <h2>${p ? 'Edit Account' : 'Naya Account'}</h2>
-      <label>Account / Website ka naam</label><input id="fSite" placeholder="Gmail, Instagram, Zerodha..." value="${esc(p?.site)}">
-      <label>Email / Username</label><input id="fUser" placeholder="example@gmail.com" value="${esc(p?.user)}" autocapitalize="off">
-      <label>Password</label>
-      <div class="row"><input id="fPass" type="text" value="${esc(p?.pass)}" autocapitalize="off" autocomplete="off">
-        <button class="ghost" style="flex:0 0 auto" id="fGen" type="button">🎲</button></div>
-      <label>Notes (optional)</label><textarea id="fNotes">${esc(p?.notes)}</textarea>
-      <div class="row" style="margin-top:14px">
-        ${p ? '<button class="danger" id="fDel">Delete</button>' : ''}
-        <button class="ghost" id="fCancel">Cancel</button>
-        <button id="fSave">Save</button>
-      </div>`, () => {
-      $('fGen').onclick = () => { $('fPass').value = genPass(); };
-      $('fCancel').onclick = closeModal;
-      if (p) $('fDel').onclick = async () => {
-        if (!confirm(`"${p.site}" delete karna hai?`)) return;
-        data.passwords = data.passwords.filter(x => x.id !== p.id); await save(); closeModal(); renderPw(); toast('Deleted');
-      };
-      $('fSave').onclick = async () => {
-        const rec = { id: p?.id || uid(), site: $('fSite').value.trim(), user: $('fUser').value.trim(), pass: $('fPass').value, notes: $('fNotes').value.trim(), updated: Date.now() };
-        if (!rec.site && !rec.user) { alert('Account ka naam ya email daalo'); return; }
-        if (p) Object.assign(p, rec); else data.passwords.push(rec);
-        await save(); closeModal(); renderPw(); toast('Saved!');
-      };
-      setTimeout(() => $('fSite').focus(), 50);
+  function wirePlatform(selEl) {
+    selEl.addEventListener('change', () => {
+      if (selEl.value !== '__other') return;
+      const name = (prompt('Platform ka naam likho:') || '').trim();
+      if (name) { selEl.insertAdjacentHTML('afterbegin', `<option>${esc(name)}</option>`); selEl.value = name; }
+      else selEl.selectedIndex = 0;
+    });
+  }
+  function lastPlatform() { const t = [...data.trades].sort((a, b) => (b.created || 0) - (a.created || 0))[0]; return t ? t.platform : PLATFORMS[0]; }
+
+  // ---------- record form (used inline on Home and in the edit sheet) ----------
+  function recordFields(prefix, t) {
+    const isLoss = t ? +t.amount < 0 : false;
+    return `
+      <div class="frow"><label>Date</label><input class="fctl" type="date" id="${prefix}Date" value="${esc(t?.date || todayStr())}"></div>
+      <div class="frow"><label>Platform</label><select class="fctl" id="${prefix}Plat">${platformOptions(t?.platform || lastPlatform())}</select></div>
+      <div class="frow"><label>Profit / Loss</label>
+        <div class="pl"><div class="sign" id="${prefix}Sign" data-v="${isLoss ? 'l' : 'p'}">
+          <button type="button" class="p" data-s="p" aria-label="Profit">+</button><button type="button" class="l" data-s="l" aria-label="Loss">−</button></div>
+          <input class="fctl" type="number" inputmode="decimal" step="0.01" min="0" placeholder="₹ Amount" id="${prefix}Amt" value="${t ? Math.abs(+t.amount) : ''}"></div></div>
+      <div class="frow"><label>Note <span style="color:var(--dim)">(Optional)</span></label><input class="fctl" id="${prefix}Note" placeholder="Good Profit Today" value="${esc(t?.notes)}"></div>`;
+  }
+  function wireRecord(prefix) {
+    const sign = $(prefix + 'Sign');
+    const paint = () => sign.querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.s === sign.dataset.v));
+    sign.querySelectorAll('button').forEach(b => b.onclick = () => { sign.dataset.v = b.dataset.s; paint(); });
+    paint(); wirePlatform($(prefix + 'Plat'));
+  }
+  function readRecord(prefix) {
+    const amt = parseFloat($(prefix + 'Amt').value), date = $(prefix + 'Date').value, platform = $(prefix + 'Plat').value;
+    if (!date) { toast('Date chuno', true); return null; }
+    if (isNaN(amt) || amt <= 0) { toast('Amount daalo', true); $(prefix + 'Amt').focus(); return null; }
+    if (platform === '__other') { toast('Platform chuno', true); return null; }
+    return { date, platform, amount: $(prefix + 'Sign').dataset.v === 'l' ? -amt : amt, notes: $(prefix + 'Note').value.trim() };
+  }
+  function buildQuickForm() { $('quickForm').innerHTML = recordFields('q', null); wireRecord('q'); }
+  $('qSave').onclick = async () => {
+    const r = readRecord('q'); if (!r) return;
+    data.trades.push({ id: uid(), created: Date.now(), ...r }); await save();
+    buildQuickForm(); render(); toast('Record Save ho gaya ✓');
+  };
+
+  function editTrade(t) {
+    sheet(`<h3>Record Edit Karo</h3><div class="form-card">${recordFields('e', t)}</div>
+      <div class="btns"><button class="btn danger" id="eDel">Delete</button><button class="btn" id="eSave">Save</button></div>`, () => {
+      wireRecord('e');
+      $('eSave').onclick = async () => { const r = readRecord('e'); if (!r) return; Object.assign(t, r); await save(); closeLayer(); render(); toast('Update ho gaya ✓'); };
+      $('eDel').onclick = async () => { if (!confirm('Ye record delete karna hai?')) return; data.trades = data.trades.filter(x => x.id !== t.id); await save(); closeLayer(); render(); toast('Delete ho gaya'); };
     });
   }
 
-  // ---------- TRADING ----------
-  const monthName = (ym) => { const [y, m] = ym.split('-'); return new Date(+y, +m - 1, 1).toLocaleString('en-IN', { month: 'long', year: 'numeric' }); };
-  const sum = (arr) => arr.reduce((a, t) => a + (+t.amount || 0), 0);
-  const cls = (n) => n > 0 ? 'pos' : n < 0 ? 'neg' : '';
+  const sorted = (arr) => [...arr].sort((a, b) => b.date.localeCompare(a.date) || (b.created || 0) - (a.created || 0));
+  const txRow = (t) => `
+    <div class="tx" data-tid="${t.id}">
+      <svg class="arrow"><use href="#i-${+t.amount < 0 ? 'down' : 'up'}"/></svg>
+      <div class="mid"><div class="amt ${cls(+t.amount)}">${money(+t.amount, 1)}</div><div class="plat">${esc(t.platform)}</div></div>
+      <div class="right"><div class="d">${fmtDate(t.date)}</div><div class="n">${esc(t.notes)}</div></div>
+    </div>`;
+  document.addEventListener('click', e => { const r = e.target.closest('[data-tid]'); if (r) editTrade(data.trades.find(x => x.id === r.dataset.tid)); });
 
-  function renderTr() {
-    const t = todayStr(), ym = t.slice(0, 7);
-    const sT = sum(data.trades.filter(x => x.date === t)), sM = sum(data.trades.filter(x => x.date.startsWith(ym))), sA = sum(data.trades);
-    [['sToday', sT], ['sMonth', sM], ['sTotal', sA]].forEach(([id, v]) => { $(id).textContent = money(v); $(id).className = 'n ' + cls(v); });
+  // ---------- HOME ----------
+  function renderHome() {
+    const total = sum(data.trades), ym = todayStr().slice(0, 7);
+    const month = sum(data.trades.filter(t => t.date.startsWith(ym)));
+    const wins = data.trades.filter(t => +t.amount > 0).length;
+    $('hTotal').textContent = money(total); $('hTotal').style.color = total < 0 ? '#fca5a5' : '#86efac';
+    $('hTrades').textContent = data.trades.length;
+    $('hWin').textContent = data.trades.length ? Math.round(wins / data.trades.length * 100) + '%' : '0%';
+    $('hMonth').textContent = money(month);
+    $('bellDot').classList.toggle('hidden', data.trades.some(t => t.date === todayStr()));
 
-    const months = [...new Set([ym, ...data.trades.map(x => x.date.slice(0, 7))])].sort().reverse();
-    const sel = $('trMonth'); const cur = sel.value || ym;
-    sel.innerHTML = `<option value="all">Saare mahine</option>` + months.map(m => `<option value="${m}">${monthName(m)}</option>`).join('');
-    sel.value = months.includes(cur) || cur === 'all' ? cur : ym;
-
-    const f = sel.value;
-    const list = data.trades.filter(x => f === 'all' || x.date.startsWith(f));
-    if (!list.length) { $('trList').innerHTML = `<div class="card muted" style="margin-top:12px">Is mahine koi entry nahi. <b>+ Add Trade</b> dabao aur aaj ka profit/loss likho.</div>`; return; }
-
-    const byDay = {};
-    list.forEach(x => (byDay[x.date] ||= []).push(x));
-    const days = Object.keys(byDay).sort().reverse();
-    const winDays = days.filter(d => sum(byDay[d]) > 0).length;
-    $('trList').innerHTML =
-      `<div class="muted" style="margin-top:10px">Is period: <b class="${cls(sum(list))}">${money(sum(list))}</b> · ${days.length} din · ${winDays} profit wale din</div>` +
-      days.map(d => {
-        const s = sum(byDay[d]);
-        const label = new Date(d + 'T00:00').toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
-        return `<div class="day"><span>${label}</span><b class="${cls(s)}">${money(s)}</b></div>` +
-          byDay[d].map(x => `
-            <div class="item between" data-id="${x.id}" style="cursor:pointer">
-              <div><div class="title">${esc(x.symbol) || 'Trade'}</div>${x.notes ? `<div class="muted">${esc(x.notes)}</div>` : ''}</div>
-              <div class="title ${cls(+x.amount)}">${money(+x.amount)}</div>
-            </div>`).join('');
-      }).join('');
+    // sparkline: cumulative P&L across the last 20 records
+    const pts = []; let acc = 0;
+    [...data.trades].sort((a, b) => a.date.localeCompare(b.date) || (a.created || 0) - (b.created || 0)).forEach(t => { acc += +t.amount; pts.push(acc); });
+    const s = pts.slice(-20);
+    if (s.length >= 2) {
+      const mn = Math.min(...s), mx = Math.max(...s), rg = mx - mn || 1;
+      const xy = s.map((v, i) => [i / (s.length - 1) * 100 + 2, 50 - (v - mn) / rg * 42]);
+      const [lx, ly] = xy[xy.length - 1];
+      $('hSpark').innerHTML = `<polyline points="${xy.map(p => p.join(',')).join(' ')}" fill="none" stroke="url(#gSpark)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/><circle cx="${lx}" cy="${ly}" r="3" fill="#f0abfc"/>`;
+    } else {
+      $('hSpark').innerHTML = `<polyline points="4,48 26,36 44,40 64,24 82,28 104,8" fill="none" stroke="url(#gSpark)" stroke-width="2.5" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>`;
+    }
+    const rec = sorted(data.trades).slice(0, 5);
+    $('recent').innerHTML = rec.length ? rec.map(txRow).join('') : `<div class="empty">Abhi koi record nahi hai.<br>Upar form bharke apna pehla profit/loss save karo 📈</div>`;
   }
-  $('trMonth').onchange = renderTr;
-  $('trList').onclick = (e) => { const it = e.target.closest('.item'); if (it) trForm(data.trades.find(x => x.id === it.dataset.id)); };
-  $('addTr').onclick = () => trForm(null);
 
-  function trForm(t) {
-    let type = t ? (+t.amount < 0 ? 'l' : 'p') : 'p';
-    modal(`
-      <h2>${t ? 'Edit Entry' : 'Profit / Loss Likho'}</h2>
-      <label>Date</label><input id="tDate" type="date" value="${esc(t?.date || todayStr())}">
-      <label>Profit hai ya Loss?</label>
-      <div class="seg"><button type="button" class="p" data-t="p">📈 Profit</button><button type="button" class="l" data-t="l">📉 Loss</button></div>
-      <label>Amount (₹)</label><input id="tAmt" type="number" inputmode="decimal" step="0.01" min="0" placeholder="0" value="${t ? Math.abs(+t.amount) : ''}">
-      <label>Stock / Symbol (optional)</label><input id="tSym" placeholder="NIFTY, BANKNIFTY, RELIANCE..." value="${esc(t?.symbol)}">
-      <label>Notes (optional)</label><textarea id="tNotes" placeholder="Kya seekha, kya galti hui...">${esc(t?.notes)}</textarea>
-      <div class="row" style="margin-top:14px">
-        ${t ? '<button class="danger" id="tDel">Delete</button>' : ''}
-        <button class="ghost" id="tCancel">Cancel</button>
-        <button id="tSave">Save</button>
-      </div>`, (m) => {
-      const segs = m.querySelectorAll('.seg button');
-      const paint = () => segs.forEach(b => b.classList.toggle('on', b.dataset.t === type));
-      segs.forEach(b => b.onclick = () => { type = b.dataset.t; paint(); }); paint();
-      $('tCancel').onclick = closeModal;
-      if (t) $('tDel').onclick = async () => {
-        if (!confirm('Ye entry delete karni hai?')) return;
-        data.trades = data.trades.filter(x => x.id !== t.id); await save(); closeModal(); renderTr(); toast('Deleted');
-      };
-      $('tSave').onclick = async () => {
-        const amt = parseFloat($('tAmt').value);
-        if (!$('tDate').value) { alert('Date chuno'); return; }
-        if (isNaN(amt)) { alert('Amount daalo'); return; }
-        const rec = { id: t?.id || uid(), date: $('tDate').value, amount: type === 'l' ? -Math.abs(amt) : Math.abs(amt), symbol: $('tSym').value.trim(), notes: $('tNotes').value.trim() };
-        if (t) Object.assign(t, rec); else data.trades.push(rec);
-        await save(); closeModal(); renderTr(); toast('Saved!');
-      };
-      setTimeout(() => $('tAmt').focus(), 50);
+  // ---------- HISTORY ----------
+  function monthOptions(el, withAll) {
+    const ym = todayStr().slice(0, 7);
+    const months = [...new Set([ym, ...data.trades.map(t => t.date.slice(0, 7))])].sort().reverse();
+    const cur = el.value;
+    el.innerHTML = (withAll ? `<option value="all">Saare mahine</option>` : '') + months.map(m => `<option value="${m}">${monthName(m)}</option>`).join('');
+    el.value = cur && [...el.options].some(o => o.value === cur) ? cur : (withAll ? 'all' : ym);
+  }
+  function renderHistory() {
+    monthOptions($('fMonth'), true);
+    const cur = $('fPlat').value, plats = [...new Set(data.trades.map(t => t.platform))].sort();
+    $('fPlat').innerHTML = `<option value="all">Saare platforms</option>` + plats.map(p => `<option>${esc(p)}</option>`).join('');
+    $('fPlat').value = plats.includes(cur) ? cur : 'all';
+    const m = $('fMonth').value, p = $('fPlat').value;
+    const list = sorted(data.trades.filter(t => (m === 'all' || t.date.startsWith(m)) && (p === 'all' || t.platform === p)));
+    if (!list.length) { $('hSum').textContent = ''; $('histList').innerHTML = `<div class="empty" style="margin-top:10px">Is filter mein koi record nahi.</div>`; return; }
+    const s = sum(list);
+    $('hSum').innerHTML = `${list.length} records · Total <b class="${cls(s)}">${money(s, 1)}</b>`;
+    const byDay = {}; list.forEach(t => (byDay[t.date] ||= []).push(t));
+    $('histList').innerHTML = Object.keys(byDay).map(d => {
+      const ds = sum(byDay[d]);
+      return `<div class="day-h"><span>${new Date(d + 'T00:00').toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'short' })}</span><b class="${cls(ds)}">${money(ds, 1)}</b></div>` + byDay[d].map(txRow).join('');
+    }).join('');
+  }
+  $('fMonth').onchange = renderHistory; $('fPlat').onchange = renderHistory;
+
+  // ---------- STATS ----------
+  function renderStats() {
+    monthOptions($('sMonth'), true);
+    const m = $('sMonth').value;
+    const list = data.trades.filter(t => m === 'all' || t.date.startsWith(m));
+    const total = sum(list), wins = list.filter(t => +t.amount > 0), losses = list.filter(t => +t.amount < 0);
+    const byDay = {}; list.forEach(t => { byDay[t.date] = (byDay[t.date] || 0) + +t.amount; });
+    const days = Object.entries(byDay);
+    const best = days.reduce((a, b) => (!a || b[1] > a[1] ? b : a), null);
+    const worst = days.reduce((a, b) => (!a || b[1] < a[1] ? b : a), null);
+    const tile = (l, v, c, sub) => `<div class="tile"><small>${l}</small><b class="${c || ''}">${v}</b>${sub ? `<span>${sub}</span>` : ''}</div>`;
+    $('sTiles').innerHTML =
+      tile('Net Profit / Loss', money(total, 1), cls(total)) +
+      tile('Win Rate', list.length ? Math.round(wins.length / list.length * 100) + '%' : '—', '', `${wins.length} jeet · ${losses.length} haar`) +
+      tile('Best Day', best && best[1] > 0 ? money(best[1], 1) : '—', 'pos', best && best[1] > 0 ? fmtDate(best[0]) : '') +
+      tile('Worst Day', worst && worst[1] < 0 ? money(worst[1], 1) : '—', 'neg', worst && worst[1] < 0 ? fmtDate(worst[0]) : '') +
+      tile('Total Profit', money(sum(wins)), 'pos', `${wins.length} records`) +
+      tile('Total Loss', money(sum(losses)), 'neg', `${losses.length} records`);
+
+    // Chart: one bar per day (month view) or per month (all view)
+    let series;
+    if (m === 'all') {
+      const bm = {}; data.trades.forEach(t => { const k = t.date.slice(0, 7); bm[k] = (bm[k] || 0) + +t.amount; });
+      series = Object.keys(bm).sort().slice(-12).map(k => ({ k, label: new Date(k + '-01T00:00').toLocaleString('en-IN', { month: 'short' }), full: monthName(k), v: bm[k] }));
+    } else {
+      series = Object.keys(byDay).sort().map(k => ({ k, label: String(+k.slice(8)), full: fmtDate(k), v: byDay[k] }));
+    }
+    drawChart(series);
+
+    const bp = {}; list.forEach(t => { (bp[t.platform] ||= { n: 0, v: 0 }); bp[t.platform].n++; bp[t.platform].v += +t.amount; });
+    const rows = Object.entries(bp).sort((a, b) => b[1].v - a[1].v);
+    $('platTbl').innerHTML = rows.length
+      ? `<tr><th>Platform</th><th>Records</th><th>P / L</th></tr>` + rows.map(([p, o]) => `<tr><td>${esc(p)}</td><td>${o.n}</td><td class="${cls(o.v)}">${money(o.v, 1)}</td></tr>`).join('')
+      : `<tr><td style="color:var(--muted);text-align:center" colspan="3">Koi data nahi</td></tr>`;
+  }
+  $('sMonth').onchange = renderStats;
+
+  function drawChart(series) {
+    const svg = $('chart'), tip = $('tip'); tip.classList.add('hidden');
+    if (!series.length) { svg.innerHTML = `<text x="50%" y="50%" text-anchor="middle" fill="#9a92b8" font-size="13">Is period mein koi data nahi</text>`; return; }
+    const W = svg.clientWidth || 340, H = 200, padL = 46, padR = 6, padT = 10, padB = 24;
+    svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+    const max = Math.max(0, ...series.map(s => s.v)), min = Math.min(0, ...series.map(s => s.v));
+    const rg = (max - min) || 1, y = v => padT + (max - v) / rg * (H - padT - padB);
+    const step = (W - padL - padR) / series.length, bw = Math.max(3, Math.min(28, step - 2));
+    const short = v => { const a = Math.abs(v); return (v < 0 ? '-' : '') + (a >= 1e5 ? (a / 1e5).toFixed(1) + 'L' : a >= 1e3 ? (a / 1e3).toFixed(1) + 'k' : Math.round(a)); };
+    let g = '';
+    [max, (max + min) / 2, min].forEach(v => { g += `<line x1="${padL}" x2="${W - padR}" y1="${y(v)}" y2="${y(v)}" stroke="#2c2347" stroke-width="1" ${v === 0 ? '' : 'stroke-dasharray="3 4"'}/><text x="${padL - 6}" y="${y(v) + 4}" text-anchor="end" fill="#6d658a" font-size="11">₹${short(v)}</text>`; });
+    g += `<line x1="${padL}" x2="${W - padR}" y1="${y(0)}" y2="${y(0)}" stroke="#6d658a" stroke-width="1"/>`;
+    const every = Math.ceil(series.length / 10);
+    series.forEach((s, i) => {
+      const x = padL + i * step + (step - bw) / 2, y0 = y(0), y1 = y(s.v), h = Math.max(1, Math.abs(y1 - y0)), top = Math.min(y0, y1), r = Math.min(4, bw / 2, h);
+      const c = s.v >= 0 ? '#22c55e' : '#ef4444';
+      // rounded only at the data end; flat on the baseline
+      const d = s.v >= 0
+        ? `M${x},${y0} V${top + r} Q${x},${top} ${x + r},${top} H${x + bw - r} Q${x + bw},${top} ${x + bw},${top + r} V${y0} Z`
+        : `M${x},${y0} V${top + h - r} Q${x},${top + h} ${x + r},${top + h} H${x + bw - r} Q${x + bw},${top + h} ${x + bw},${top + h - r} V${y0} Z`;
+      g += `<path d="${d}" fill="${c}"/>`;
+      g += `<rect class="hit" data-i="${i}" x="${padL + i * step}" y="${padT}" width="${step}" height="${H - padT - padB}" fill="transparent"/>`;
+      if (i % every === 0) g += `<text x="${x + bw / 2}" y="${H - 6}" text-anchor="middle" fill="#6d658a" font-size="11">${esc(s.label)}</text>`;
     });
+    svg.innerHTML = g;
+    const showTip = (e) => {
+      const r = e.target.closest('.hit'); if (!r) return tip.classList.add('hidden');
+      const s = series[+r.dataset.i], box = svg.getBoundingClientRect(), card = $('chartCard').getBoundingClientRect();
+      const cx = (+r.getAttribute('x') + +r.getAttribute('width') / 2) / W * box.width + box.left - card.left;
+      const cy = y(Math.max(0, s.v)) / H * box.height + box.top - card.top;
+      tip.innerHTML = `<div style="color:#9a92b8">${esc(s.full)}</div><b class="${cls(s.v)}">${money(s.v, 1)}</b>`;
+      tip.style.left = Math.min(Math.max(cx, 60), card.width - 60) + 'px'; tip.style.top = cy + 'px';
+      tip.classList.remove('hidden');
+    };
+    svg.onmousemove = showTip; svg.onclick = showTip; svg.onmouseleave = () => tip.classList.add('hidden');
   }
+  window.addEventListener('resize', () => { if (page === 'stats' && data) renderStats(); });
 
-  // ---------- SETTINGS ----------
+  // ---------- PROFILE ----------
+  function renderProfile() {
+    const email = readStore()?.email || '';
+    $('profEmail').textContent = email;
+    $('avatar').textContent = (email[0] || 'F').toUpperCase();
+  }
+  $('logoutBtn').onclick = openAuth;
   $('exportBtn').onclick = async () => {
     await save();
-    const blob = new Blob([JSON.stringify({ app: 'Faith Personal', ...readStore() })], { type: 'application/json' });
-    const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
-    a.download = `faith-personal-backup-${todayStr()}.json`; a.click();
-    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+    const s = readStore();
+    const blob = new Blob([JSON.stringify({ app: 'Faith Personal', v: s.v, salt: s.salt, iv: s.iv, ct: s.ct })], { type: 'application/json' });
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `faith-personal-backup-${todayStr()}.json`; a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1500); toast('Backup download ho gaya ✓');
   };
   $('importBtn').onclick = () => $('importFile').click();
   $('importFile').onchange = async (e) => {
-    const file = e.target.files[0]; e.target.value = ''; if (!file) return;
-    try {
-      const blob = JSON.parse(await file.text());
-      if (!blob.ct || !blob.salt || !blob.iv) throw 0;
-      const p = prompt('Is backup ka master password daalo:'); if (p == null) return;
-      const s = unb64(blob.salt), k = await deriveKey(p, s);
-      let d; try { d = await decryptObj(blob, k); } catch { alert('Galat password'); return; }
-      if (!confirm(`Backup mein ${d.passwords?.length || 0} passwords aur ${d.trades?.length || 0} trades hain. Abhi wala data replace ho jayega. Continue?`)) return;
-      data = { passwords: d.passwords || [], trades: d.trades || [] }; key = k; salt = s;
-      await save(); renderAll(); toast('Restored!');
-    } catch { alert('Ye sahi backup file nahi hai'); }
+    const f = e.target.files[0]; e.target.value = ''; if (!f) return;
+    let blob; try { blob = JSON.parse(await f.text()); if (!blob.ct || !blob.iv || !blob.salt) throw 0; } catch { return alert('Ye sahi backup file nahi hai'); }
+    const p = prompt('Is backup ka password daalo:'); if (p == null) return;
+    const s = unb64(blob.salt), k = await deriveKey(p, s);
+    let d; try { d = normalise(await decryptObj(blob, k)); } catch { return alert('Galat password'); }
+    if (!confirm(`Backup mein ${d.trades.length} trading records aur ${d.passwords.length} passwords hain.\nAbhi ka data replace ho jayega. Continue?`)) return;
+    data = d; key = k; salt = s; await save(); buildQuickForm(); render(); toast('Restore ho gaya ✓');
   };
-  $('changeMp').onclick = async () => {
-    const a = $('newMp1').value, b = $('newMp2').value;
-    if (a.length < 6) return alert('Kam se kam 6 characters');
-    if (a !== b) return alert('Dono match nahi kar rahe');
-    salt = crypto.getRandomValues(new Uint8Array(16)); key = await deriveKey(a, salt);
-    await save(); $('newMp1').value = $('newMp2').value = ''; toast('Password badal gaya!');
-  };
+  $('changePwBtn').onclick = () => sheet(`
+    <h3>Password Badlo</h3>
+    <label class="l">Purana password</label><input class="fctl" type="password" id="cOld" autocomplete="current-password">
+    <label class="l">Naya password</label><input class="fctl" type="password" id="cNew" autocomplete="new-password">
+    <label class="l">Naya password dobara</label><input class="fctl" type="password" id="cNew2" autocomplete="new-password">
+    <div class="btns"><button class="btn ghost" data-close>Cancel</button><button class="btn" id="cSave">Change</button></div>`, () => {
+    $('cSave').onclick = async () => {
+      const s = readStore();
+      try { await decryptObj(s, await deriveKey($('cOld').value, unb64(s.salt))); } catch { return toast('Purana password galat hai', true); }
+      if ($('cNew').value.length < 6) return toast('Kam se kam 6 characters', true);
+      if ($('cNew').value !== $('cNew2').value) return toast('Naye password match nahi kar rahe', true);
+      salt = crypto.getRandomValues(new Uint8Array(16)); key = await deriveKey($('cNew').value, salt);
+      await save(); closeLayer(); toast('Password badal gaya ✓');
+    };
+  });
   $('wipeBtn').onclick = () => {
-    if (!confirm('Saare passwords aur trades hamesha ke liye delete ho jayenge. Pakka?')) return;
+    if (!confirm('Saare trading records aur passwords hamesha ke liye delete ho jayenge. Pakka?')) return;
     if (prompt('Confirm karne ke liye DELETE likho') !== 'DELETE') return;
     try { localStorage.removeItem(STORE); } catch {}
-    showLock();
+    openAuth();
   };
 
-  if (!window.crypto?.subtle) {
-    document.body.innerHTML = '<div class="center"><div class="card">Ye browser secure encryption support nahi karta. Chrome/Safari ka latest version use karo (https par).</div></div>';
-  } else showLock();
+  // ---------- VAULT ----------
+  function renderVault() {
+    const q = $('vSearch').value.trim().toLowerCase();
+    const list = data.passwords.filter(p => !q || [p.site, p.user, p.notes].some(x => (x || '').toLowerCase().includes(q))).sort((a, b) => (a.site || '').localeCompare(b.site || ''));
+    if (!data.passwords.length) { $('vList').innerHTML = `<div class="empty">Abhi koi password save nahi hai.<br>Upar button dabake apna Gmail ya koi aur account add karo.</div>`; return; }
+    $('vList').innerHTML = list.map(p => `
+      <div class="vault-item" data-vid="${p.id}">
+        <div class="t"><span>${esc(p.site) || '(No name)'}</span><button class="chip" data-a="edit">Edit</button></div>
+        ${p.user ? `<div class="vf"><span class="v">${esc(p.user)}</span><button class="chip" data-a="cu">Copy</button></div>` : ''}
+        <div class="vf"><span class="v" data-pw>••••••••</span><button class="chip" data-a="show">👁</button><button class="chip" data-a="cp">Copy</button></div>
+        ${p.notes ? `<div style="color:var(--muted);font-size:13px;margin-top:6px">${esc(p.notes)}</div>` : ''}
+      </div>`).join('') || `<div class="empty">Kuch nahi mila</div>`;
+  }
+  $('vSearch').oninput = renderVault;
+  $('vAdd').onclick = () => vaultForm(null);
+  $('vList').onclick = async (e) => {
+    const b = e.target.closest('button'); if (!b) return;
+    const it = b.closest('[data-vid]'), p = data.passwords.find(x => x.id === it.dataset.vid);
+    if (b.dataset.a === 'edit') return vaultForm(p);
+    if (b.dataset.a === 'show') { const s = it.querySelector('[data-pw]'), on = s.textContent === '••••••••'; s.textContent = on ? p.pass : '••••••••'; b.textContent = on ? '🙈' : '👁'; }
+    if (b.dataset.a === 'cp' || b.dataset.a === 'cu') {
+      const v = b.dataset.a === 'cp' ? p.pass : p.user;
+      try { await navigator.clipboard.writeText(v); toast('Copied ✓'); } catch { prompt('Copy karo:', v); }
+    }
+  };
+  function genPass() {
+    const c = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%&*?';
+    return Array.from(crypto.getRandomValues(new Uint32Array(16)), n => c[n % c.length]).join('');
+  }
+  function vaultForm(p) {
+    sheet(`<h3>${p ? 'Account Edit Karo' : 'Naya Account'}</h3>
+      <label class="l">Account / Website</label><input class="fctl" id="vSite" placeholder="Gmail, Instagram, Quotex..." value="${esc(p?.site)}">
+      <label class="l">Email / Username</label><input class="fctl" id="vUser" placeholder="example@gmail.com" autocapitalize="off" value="${esc(p?.user)}">
+      <label class="l">Password</label><div style="display:flex;gap:8px"><input class="fctl" id="vPass" autocapitalize="off" autocomplete="off" value="${esc(p?.pass)}"><button class="chip" type="button" id="vGen" title="Strong password banao">🎲</button></div>
+      <label class="l">Notes (optional)</label><input class="fctl" id="vNotes" value="${esc(p?.notes)}">
+      <div class="btns">${p ? '<button class="btn danger" id="vDel">Delete</button>' : '<button class="btn ghost" data-close>Cancel</button>'}<button class="btn" id="vSave">Save</button></div>`, () => {
+      $('vGen').onclick = () => { $('vPass').value = genPass(); };
+      if (p) $('vDel').onclick = async () => { if (!confirm(`"${p.site}" delete karna hai?`)) return; data.passwords = data.passwords.filter(x => x.id !== p.id); await save(); closeLayer(); renderVault(); toast('Delete ho gaya'); };
+      $('vSave').onclick = async () => {
+        const r = { site: $('vSite').value.trim(), user: $('vUser').value.trim(), pass: $('vPass').value, notes: $('vNotes').value.trim(), updated: Date.now() };
+        if (!r.site && !r.user) return toast('Account ka naam ya email daalo', true);
+        if (p) Object.assign(p, r); else data.passwords.push({ id: uid(), ...r });
+        await save(); closeLayer(); renderVault(); toast('Save ho gaya ✓');
+      };
+    });
+  }
+
+  // ---------- boot ----------
+  if (!window.crypto || !crypto.subtle) {
+    document.body.innerHTML = '<div style="padding:40px 20px;text-align:center">Ye browser secure encryption support nahi karta.<br>Chrome ya Safari ka latest version use karo.</div>';
+  } else show('splash');
 })();
 </script>
 </body>
