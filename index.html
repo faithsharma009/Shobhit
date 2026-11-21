@@ -1,0 +1,430 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f172a">
+<title>Faith Personal</title>
+<style>
+  :root {
+    --bg: #0f172a; --card: #1e293b; --card2: #273449; --text: #e2e8f0; --muted: #94a3b8;
+    --accent: #6366f1; --accent2: #818cf8; --green: #22c55e; --red: #ef4444; --border: #334155;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+  .wrap { max-width: 720px; margin: 0 auto; padding: 16px 16px 90px; }
+  h1 { font-size: 22px; margin: 8px 0 16px; }
+  h2 { font-size: 18px; margin: 0 0 12px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 16px; margin-bottom: 12px; }
+  label { display: block; font-size: 13px; color: var(--muted); margin: 10px 0 4px; }
+  input, textarea, select { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 16px; }
+  textarea { min-height: 60px; resize: vertical; }
+  button { cursor: pointer; border: 0; border-radius: 10px; padding: 12px 16px; font-size: 15px; font-weight: 600; background: var(--accent); color: #fff; }
+  button.ghost { background: var(--card2); color: var(--text); }
+  button.danger { background: var(--red); }
+  button.small { padding: 7px 10px; font-size: 13px; }
+  .row { display: flex; gap: 8px; align-items: center; }
+  .row > * { flex: 1; }
+  .between { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+  .muted { color: var(--muted); font-size: 13px; }
+  .hidden { display: none !important; }
+  .center { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 16px; }
+  .login { width: 100%; max-width: 380px; text-align: center; }
+  .logo { width: 64px; height: 64px; border-radius: 18px; background: linear-gradient(135deg, var(--accent), #ec4899); display: inline-flex; align-items: center; justify-content: center; font-size: 30px; font-weight: 800; margin-bottom: 8px; }
+  .err { color: var(--red); font-size: 14px; min-height: 20px; margin-top: 8px; }
+  .item { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; margin-bottom: 8px; }
+  .item .title { font-weight: 700; font-size: 16px; }
+  .field { display: flex; align-items: center; gap: 6px; margin-top: 6px; font-family: ui-monospace, monospace; font-size: 14px; word-break: break-all; }
+  .field span.val { flex: 1; }
+  .tabs { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card); border-top: 1px solid var(--border); display: flex; padding-bottom: env(safe-area-inset-bottom); }
+  .tabs button { flex: 1; background: none; color: var(--muted); border-radius: 0; padding: 14px 4px; }
+  .tabs button.active { color: var(--accent2); }
+  .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px; }
+  .stat { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 12px; text-align: center; }
+  .stat .n { font-size: 18px; font-weight: 800; margin-top: 4px; }
+  .pos { color: var(--green); } .neg { color: var(--red); }
+  .day { margin: 14px 0 6px; font-size: 13px; color: var(--muted); display: flex; justify-content: space-between; }
+  .modal { position: fixed; inset: 0; background: rgba(0,0,0,.6); display: flex; align-items: flex-end; justify-content: center; z-index: 10; }
+  .modal .card { width: 100%; max-width: 560px; margin: 0; border-radius: 18px 18px 0 0; max-height: 92vh; overflow: auto; padding-bottom: calc(16px + env(safe-area-inset-bottom)); }
+  .toast { position: fixed; top: 16px; left: 50%; transform: translateX(-50%); background: var(--green); color: #052e16; padding: 10px 16px; border-radius: 10px; font-weight: 700; z-index: 20; }
+  .seg { display: flex; gap: 6px; }
+  .seg button { flex: 1; background: var(--card2); color: var(--text); }
+  .seg button.on.p { background: var(--green); color: #052e16; }
+  .seg button.on.l { background: var(--red); }
+  @media (max-width: 420px) { .stat .n { font-size: 15px; } }
+</style>
+</head>
+<body>
+
+<!-- LOCK SCREEN -->
+<div id="lock" class="center">
+  <div class="login card">
+    <div class="logo">F</div>
+    <h1>Faith Personal</h1>
+    <p class="muted" id="lockMsg">Master password daalo</p>
+    <input id="mp1" type="password" placeholder="Master password" autocomplete="current-password">
+    <input id="mp2" type="password" placeholder="Master password dobara likho" class="hidden" style="margin-top:8px" autocomplete="new-password">
+    <button id="unlockBtn" style="width:100%;margin-top:12px">Unlock</button>
+    <div class="err" id="lockErr"></div>
+    <p class="muted" id="setupNote" class="hidden"></p>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app" class="hidden">
+  <div class="wrap">
+    <div class="between">
+      <h1>Faith Personal</h1>
+      <button class="ghost small" id="lockNow">🔒 Lock</button>
+    </div>
+
+    <!-- PASSWORDS -->
+    <section id="tab-pw">
+      <div class="row" style="margin-bottom:12px">
+        <input id="pwSearch" placeholder="🔍 Search (Gmail, Instagram...)">
+        <button style="flex:0 0 auto" id="addPw">+ Add</button>
+      </div>
+      <div id="pwList"></div>
+    </section>
+
+    <!-- TRADING -->
+    <section id="tab-tr" class="hidden">
+      <div class="stats">
+        <div class="stat"><div class="muted">Aaj</div><div class="n" id="sToday">₹0</div></div>
+        <div class="stat"><div class="muted">Is Mahine</div><div class="n" id="sMonth">₹0</div></div>
+        <div class="stat"><div class="muted">Total</div><div class="n" id="sTotal">₹0</div></div>
+      </div>
+      <div class="row" style="margin-bottom:4px">
+        <select id="trMonth"></select>
+        <button style="flex:0 0 auto" id="addTr">+ Add Trade</button>
+      </div>
+      <div id="trList"></div>
+    </section>
+
+    <!-- SETTINGS -->
+    <section id="tab-set" class="hidden">
+      <div class="card">
+        <h2>Backup</h2>
+        <p class="muted">Backup file encrypted hoti hai — sirf aapke master password se khulegi. Phone change karne se pehle backup zaroor lo.</p>
+        <div class="row">
+          <button id="exportBtn">⬇ Backup Download</button>
+          <button class="ghost" id="importBtn">⬆ Restore</button>
+        </div>
+        <input type="file" id="importFile" accept=".json,application/json" class="hidden">
+      </div>
+      <div class="card">
+        <h2>Master Password Badlo</h2>
+        <input id="newMp1" type="password" placeholder="Naya master password" autocomplete="new-password">
+        <input id="newMp2" type="password" placeholder="Dobara likho" style="margin-top:8px" autocomplete="new-password">
+        <button style="margin-top:10px;width:100%" id="changeMp">Change</button>
+      </div>
+      <div class="card">
+        <h2>Security</h2>
+        <p class="muted">• Saara data AES-256 se encrypt hota hai, sirf isi device pe save hota hai.<br>
+        • 5 minute kuch na karo to app khud lock ho jaata hai.<br>
+        • Master password bhool gaye to data wapas nahi milega — use yaad rakhna.</p>
+        <button class="danger" id="wipeBtn" style="width:100%">Saara Data Delete Karo</button>
+      </div>
+    </section>
+  </div>
+
+  <nav class="tabs">
+    <button data-tab="pw" class="active">🔑<br>Passwords</button>
+    <button data-tab="tr">📈<br>Trading</button>
+    <button data-tab="set">⚙️<br>Settings</button>
+  </nav>
+</div>
+
+<div id="modalRoot"></div>
+
+<script>
+(() => {
+  const STORE = 'faithPersonal.v1';
+  const enc = new TextEncoder(), dec = new TextDecoder();
+  const $ = (id) => document.getElementById(id);
+  const b64 = (buf) => btoa(String.fromCharCode(...new Uint8Array(buf)));
+  const unb64 = (s) => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+  const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const uid = () => crypto.randomUUID ? crypto.randomUUID() : Date.now() + '' + Math.random();
+  const todayStr = () => { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); };
+  const money = (n) => (n < 0 ? '-' : '') + '₹' + Math.abs(n).toLocaleString('en-IN', { maximumFractionDigits: 2 });
+
+  let key = null, salt = null, data = null;
+
+  function readStore() { try { return JSON.parse(localStorage.getItem(STORE)); } catch { return null; } }
+  function writeStore(obj) { try { localStorage.setItem(STORE, JSON.stringify(obj)); return true; } catch { alert('Save nahi hua — storage full ya blocked hai.'); return false; } }
+
+  async function deriveKey(pass, saltBytes) {
+    const base = await crypto.subtle.importKey('raw', enc.encode(pass), 'PBKDF2', false, ['deriveKey']);
+    return crypto.subtle.deriveKey({ name: 'PBKDF2', salt: saltBytes, iterations: 310000, hash: 'SHA-256' },
+      base, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']);
+  }
+  async function encryptObj(obj, k, s) {
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const ct = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, k, enc.encode(JSON.stringify(obj)));
+    return { v: 1, salt: b64(s), iv: b64(iv), ct: b64(ct) };
+  }
+  async function decryptObj(blob, k) {
+    const pt = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: unb64(blob.iv) }, k, unb64(blob.ct));
+    return JSON.parse(dec.decode(pt));
+  }
+  async function save() { writeStore(await encryptObj(data, key, salt)); }
+
+  function toast(msg) {
+    const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg;
+    document.body.appendChild(t); setTimeout(() => t.remove(), 1600);
+  }
+
+  // ---------- LOCK / UNLOCK ----------
+  const isNew = () => !readStore();
+  function showLock() {
+    key = null; data = null;
+    $('app').classList.add('hidden'); $('lock').classList.remove('hidden');
+    $('modalRoot').innerHTML = '';
+    $('mp1').value = ''; $('mp2').value = ''; $('lockErr').textContent = '';
+    if (isNew()) {
+      $('lockMsg').textContent = 'Pehli baar? Ek strong master password banao. Yahi password app kholne ke liye lagega.';
+      $('mp2').classList.remove('hidden'); $('unlockBtn').textContent = 'Create';
+    } else {
+      $('lockMsg').textContent = 'Master password daalo';
+      $('mp2').classList.add('hidden'); $('unlockBtn').textContent = 'Unlock';
+    }
+    setTimeout(() => $('mp1').focus(), 50);
+  }
+  async function unlock() {
+    const p = $('mp1').value; $('lockErr').textContent = '';
+    if (!p) { $('lockErr').textContent = 'Password daalo'; return; }
+    $('unlockBtn').disabled = true;
+    try {
+      if (isNew()) {
+        if (p.length < 6) { $('lockErr').textContent = 'Kam se kam 6 characters'; return; }
+        if (p !== $('mp2').value) { $('lockErr').textContent = 'Dono password match nahi kar rahe'; return; }
+        salt = crypto.getRandomValues(new Uint8Array(16));
+        key = await deriveKey(p, salt);
+        data = { passwords: [], trades: [] };
+        await save();
+      } else {
+        const blob = readStore();
+        salt = unb64(blob.salt);
+        key = await deriveKey(p, salt);
+        try { data = await decryptObj(blob, key); }
+        catch { key = null; $('lockErr').textContent = 'Galat password'; return; }
+        data.passwords ||= []; data.trades ||= [];
+      }
+      $('lock').classList.add('hidden'); $('app').classList.remove('hidden');
+      renderAll(); bumpIdle();
+    } finally { $('unlockBtn').disabled = false; }
+  }
+  $('unlockBtn').onclick = unlock;
+  ['mp1', 'mp2'].forEach(id => $(id).addEventListener('keydown', e => { if (e.key === 'Enter') unlock(); }));
+  $('lockNow').onclick = showLock;
+
+  let idleTimer;
+  function bumpIdle() { clearTimeout(idleTimer); if (key) idleTimer = setTimeout(showLock, 5 * 60 * 1000); }
+  ['click', 'keydown', 'touchstart', 'scroll'].forEach(ev => document.addEventListener(ev, bumpIdle, { passive: true }));
+
+  // ---------- TABS ----------
+  document.querySelectorAll('.tabs button').forEach(b => b.onclick = () => {
+    document.querySelectorAll('.tabs button').forEach(x => x.classList.toggle('active', x === b));
+    ['pw', 'tr', 'set'].forEach(t => $('tab-' + t).classList.toggle('hidden', t !== b.dataset.tab));
+  });
+
+  function renderAll() { renderPw(); renderTr(); }
+
+  // ---------- MODAL ----------
+  function modal(html, onMount) {
+    $('modalRoot').innerHTML = `<div class="modal"><div class="card">${html}</div></div>`;
+    const m = $('modalRoot').firstChild;
+    m.addEventListener('click', e => { if (e.target === m) closeModal(); });
+    onMount && onMount(m);
+  }
+  const closeModal = () => { $('modalRoot').innerHTML = ''; };
+
+  // ---------- PASSWORDS ----------
+  function renderPw() {
+    const q = $('pwSearch').value.trim().toLowerCase();
+    const list = data.passwords
+      .filter(p => !q || [p.site, p.user, p.notes].some(x => (x || '').toLowerCase().includes(q)))
+      .sort((a, b) => (a.site || '').localeCompare(b.site || ''));
+    if (!data.passwords.length) {
+      $('pwList').innerHTML = `<div class="card muted">Abhi koi password save nahi hai. <b>+ Add</b> dabao aur apna pehla account daalo (jaise Gmail).</div>`;
+      return;
+    }
+    $('pwList').innerHTML = list.map(p => `
+      <div class="item" data-id="${p.id}">
+        <div class="between"><div class="title">${esc(p.site) || '(No name)'}</div>
+          <button class="ghost small" data-act="edit">Edit</button></div>
+        ${p.user ? `<div class="field"><span class="val">${esc(p.user)}</span><button class="ghost small" data-act="cu">Copy</button></div>` : ''}
+        <div class="field"><span class="val" data-pw>••••••••</span>
+          <button class="ghost small" data-act="show">👁</button>
+          <button class="ghost small" data-act="cp">Copy</button></div>
+        ${p.notes ? `<div class="muted" style="margin-top:6px">${esc(p.notes)}</div>` : ''}
+      </div>`).join('') || `<div class="muted">Kuch nahi mila</div>`;
+  }
+  $('pwSearch').oninput = renderPw;
+  $('pwList').onclick = async (e) => {
+    const btn = e.target.closest('button'); if (!btn) return;
+    const item = btn.closest('.item'); const p = data.passwords.find(x => x.id === item.dataset.id);
+    const act = btn.dataset.act;
+    if (act === 'edit') return pwForm(p);
+    if (act === 'show') { const s = item.querySelector('[data-pw]'); const shown = s.textContent !== '••••••••'; s.textContent = shown ? '••••••••' : p.pass; btn.textContent = shown ? '👁' : '🙈'; }
+    if (act === 'cp' || act === 'cu') {
+      try { await navigator.clipboard.writeText(act === 'cp' ? p.pass : p.user); toast('Copied!'); }
+      catch { prompt('Copy karo:', act === 'cp' ? p.pass : p.user); }
+    }
+  };
+  $('addPw').onclick = () => pwForm(null);
+
+  function genPass() {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%&*?';
+    const r = crypto.getRandomValues(new Uint32Array(16));
+    return Array.from(r, n => chars[n % chars.length]).join('');
+  }
+  function pwForm(p) {
+    modal(`
+      <h2>${p ? 'Edit Account' : 'Naya Account'}</h2>
+      <label>Account / Website ka naam</label><input id="fSite" placeholder="Gmail, Instagram, Zerodha..." value="${esc(p?.site)}">
+      <label>Email / Username</label><input id="fUser" placeholder="example@gmail.com" value="${esc(p?.user)}" autocapitalize="off">
+      <label>Password</label>
+      <div class="row"><input id="fPass" type="text" value="${esc(p?.pass)}" autocapitalize="off" autocomplete="off">
+        <button class="ghost" style="flex:0 0 auto" id="fGen" type="button">🎲</button></div>
+      <label>Notes (optional)</label><textarea id="fNotes">${esc(p?.notes)}</textarea>
+      <div class="row" style="margin-top:14px">
+        ${p ? '<button class="danger" id="fDel">Delete</button>' : ''}
+        <button class="ghost" id="fCancel">Cancel</button>
+        <button id="fSave">Save</button>
+      </div>`, () => {
+      $('fGen').onclick = () => { $('fPass').value = genPass(); };
+      $('fCancel').onclick = closeModal;
+      if (p) $('fDel').onclick = async () => {
+        if (!confirm(`"${p.site}" delete karna hai?`)) return;
+        data.passwords = data.passwords.filter(x => x.id !== p.id); await save(); closeModal(); renderPw(); toast('Deleted');
+      };
+      $('fSave').onclick = async () => {
+        const rec = { id: p?.id || uid(), site: $('fSite').value.trim(), user: $('fUser').value.trim(), pass: $('fPass').value, notes: $('fNotes').value.trim(), updated: Date.now() };
+        if (!rec.site && !rec.user) { alert('Account ka naam ya email daalo'); return; }
+        if (p) Object.assign(p, rec); else data.passwords.push(rec);
+        await save(); closeModal(); renderPw(); toast('Saved!');
+      };
+      setTimeout(() => $('fSite').focus(), 50);
+    });
+  }
+
+  // ---------- TRADING ----------
+  const monthName = (ym) => { const [y, m] = ym.split('-'); return new Date(+y, +m - 1, 1).toLocaleString('en-IN', { month: 'long', year: 'numeric' }); };
+  const sum = (arr) => arr.reduce((a, t) => a + (+t.amount || 0), 0);
+  const cls = (n) => n > 0 ? 'pos' : n < 0 ? 'neg' : '';
+
+  function renderTr() {
+    const t = todayStr(), ym = t.slice(0, 7);
+    const sT = sum(data.trades.filter(x => x.date === t)), sM = sum(data.trades.filter(x => x.date.startsWith(ym))), sA = sum(data.trades);
+    [['sToday', sT], ['sMonth', sM], ['sTotal', sA]].forEach(([id, v]) => { $(id).textContent = money(v); $(id).className = 'n ' + cls(v); });
+
+    const months = [...new Set([ym, ...data.trades.map(x => x.date.slice(0, 7))])].sort().reverse();
+    const sel = $('trMonth'); const cur = sel.value || ym;
+    sel.innerHTML = `<option value="all">Saare mahine</option>` + months.map(m => `<option value="${m}">${monthName(m)}</option>`).join('');
+    sel.value = months.includes(cur) || cur === 'all' ? cur : ym;
+
+    const f = sel.value;
+    const list = data.trades.filter(x => f === 'all' || x.date.startsWith(f));
+    if (!list.length) { $('trList').innerHTML = `<div class="card muted" style="margin-top:12px">Is mahine koi entry nahi. <b>+ Add Trade</b> dabao aur aaj ka profit/loss likho.</div>`; return; }
+
+    const byDay = {};
+    list.forEach(x => (byDay[x.date] ||= []).push(x));
+    const days = Object.keys(byDay).sort().reverse();
+    const winDays = days.filter(d => sum(byDay[d]) > 0).length;
+    $('trList').innerHTML =
+      `<div class="muted" style="margin-top:10px">Is period: <b class="${cls(sum(list))}">${money(sum(list))}</b> · ${days.length} din · ${winDays} profit wale din</div>` +
+      days.map(d => {
+        const s = sum(byDay[d]);
+        const label = new Date(d + 'T00:00').toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+        return `<div class="day"><span>${label}</span><b class="${cls(s)}">${money(s)}</b></div>` +
+          byDay[d].map(x => `
+            <div class="item between" data-id="${x.id}" style="cursor:pointer">
+              <div><div class="title">${esc(x.symbol) || 'Trade'}</div>${x.notes ? `<div class="muted">${esc(x.notes)}</div>` : ''}</div>
+              <div class="title ${cls(+x.amount)}">${money(+x.amount)}</div>
+            </div>`).join('');
+      }).join('');
+  }
+  $('trMonth').onchange = renderTr;
+  $('trList').onclick = (e) => { const it = e.target.closest('.item'); if (it) trForm(data.trades.find(x => x.id === it.dataset.id)); };
+  $('addTr').onclick = () => trForm(null);
+
+  function trForm(t) {
+    let type = t ? (+t.amount < 0 ? 'l' : 'p') : 'p';
+    modal(`
+      <h2>${t ? 'Edit Entry' : 'Profit / Loss Likho'}</h2>
+      <label>Date</label><input id="tDate" type="date" value="${esc(t?.date || todayStr())}">
+      <label>Profit hai ya Loss?</label>
+      <div class="seg"><button type="button" class="p" data-t="p">📈 Profit</button><button type="button" class="l" data-t="l">📉 Loss</button></div>
+      <label>Amount (₹)</label><input id="tAmt" type="number" inputmode="decimal" step="0.01" min="0" placeholder="0" value="${t ? Math.abs(+t.amount) : ''}">
+      <label>Stock / Symbol (optional)</label><input id="tSym" placeholder="NIFTY, BANKNIFTY, RELIANCE..." value="${esc(t?.symbol)}">
+      <label>Notes (optional)</label><textarea id="tNotes" placeholder="Kya seekha, kya galti hui...">${esc(t?.notes)}</textarea>
+      <div class="row" style="margin-top:14px">
+        ${t ? '<button class="danger" id="tDel">Delete</button>' : ''}
+        <button class="ghost" id="tCancel">Cancel</button>
+        <button id="tSave">Save</button>
+      </div>`, (m) => {
+      const segs = m.querySelectorAll('.seg button');
+      const paint = () => segs.forEach(b => b.classList.toggle('on', b.dataset.t === type));
+      segs.forEach(b => b.onclick = () => { type = b.dataset.t; paint(); }); paint();
+      $('tCancel').onclick = closeModal;
+      if (t) $('tDel').onclick = async () => {
+        if (!confirm('Ye entry delete karni hai?')) return;
+        data.trades = data.trades.filter(x => x.id !== t.id); await save(); closeModal(); renderTr(); toast('Deleted');
+      };
+      $('tSave').onclick = async () => {
+        const amt = parseFloat($('tAmt').value);
+        if (!$('tDate').value) { alert('Date chuno'); return; }
+        if (isNaN(amt)) { alert('Amount daalo'); return; }
+        const rec = { id: t?.id || uid(), date: $('tDate').value, amount: type === 'l' ? -Math.abs(amt) : Math.abs(amt), symbol: $('tSym').value.trim(), notes: $('tNotes').value.trim() };
+        if (t) Object.assign(t, rec); else data.trades.push(rec);
+        await save(); closeModal(); renderTr(); toast('Saved!');
+      };
+      setTimeout(() => $('tAmt').focus(), 50);
+    });
+  }
+
+  // ---------- SETTINGS ----------
+  $('exportBtn').onclick = async () => {
+    await save();
+    const blob = new Blob([JSON.stringify({ app: 'Faith Personal', ...readStore() })], { type: 'application/json' });
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+    a.download = `faith-personal-backup-${todayStr()}.json`; a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  };
+  $('importBtn').onclick = () => $('importFile').click();
+  $('importFile').onchange = async (e) => {
+    const file = e.target.files[0]; e.target.value = ''; if (!file) return;
+    try {
+      const blob = JSON.parse(await file.text());
+      if (!blob.ct || !blob.salt || !blob.iv) throw 0;
+      const p = prompt('Is backup ka master password daalo:'); if (p == null) return;
+      const s = unb64(blob.salt), k = await deriveKey(p, s);
+      let d; try { d = await decryptObj(blob, k); } catch { alert('Galat password'); return; }
+      if (!confirm(`Backup mein ${d.passwords?.length || 0} passwords aur ${d.trades?.length || 0} trades hain. Abhi wala data replace ho jayega. Continue?`)) return;
+      data = { passwords: d.passwords || [], trades: d.trades || [] }; key = k; salt = s;
+      await save(); renderAll(); toast('Restored!');
+    } catch { alert('Ye sahi backup file nahi hai'); }
+  };
+  $('changeMp').onclick = async () => {
+    const a = $('newMp1').value, b = $('newMp2').value;
+    if (a.length < 6) return alert('Kam se kam 6 characters');
+    if (a !== b) return alert('Dono match nahi kar rahe');
+    salt = crypto.getRandomValues(new Uint8Array(16)); key = await deriveKey(a, salt);
+    await save(); $('newMp1').value = $('newMp2').value = ''; toast('Password badal gaya!');
+  };
+  $('wipeBtn').onclick = () => {
+    if (!confirm('Saare passwords aur trades hamesha ke liye delete ho jayenge. Pakka?')) return;
+    if (prompt('Confirm karne ke liye DELETE likho') !== 'DELETE') return;
+    try { localStorage.removeItem(STORE); } catch {}
+    showLock();
+  };
+
+  if (!window.crypto?.subtle) {
+    document.body.innerHTML = '<div class="center"><div class="card">Ye browser secure encryption support nahi karta. Chrome/Safari ka latest version use karo (https par).</div></div>';
+  } else showLock();
+})();
+</script>
+</body>
+</html>
