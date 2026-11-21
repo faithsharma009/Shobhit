@@ -1,0 +1,56 @@
+name: Build Android APK
+
+on:
+  push:
+    branches: [claude/new-session-wnjpef, main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Install packages
+        run: npm ci
+
+      - name: Prepare Android project
+        env:
+          VERSION_CODE: ${{ github.run_number }}
+        run: native/prepare-android.sh
+
+      - name: Build APK
+        working-directory: android
+        run: ./gradlew assembleDebug --no-daemon
+
+      - name: Rename APK
+        run: cp android/app/build/outputs/apk/debug/app-debug.apk FaithPersonal.apk
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: FaithPersonal-apk
+          path: FaithPersonal.apk
+
+      - name: Publish release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v1.0.${{ github.run_number }}
+          name: Faith Personal v1.0.${{ github.run_number }}
+          body: |
+            Android app. Phone mein **FaithPersonal.apk** download karke install karo.
+            Purana version installed hai to ye uske upar update ho jayega, data safe rahega.
+          files: FaithPersonal.apk
+          make_latest: true

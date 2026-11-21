@@ -689,8 +689,20 @@
   $('exportBtn').onclick = async () => {
     await save();
     const s = readStore();
-    const blob = new Blob([JSON.stringify({ app: 'Faith Personal', v: s.v, salt: s.salt, iv: s.iv, ct: s.ct })], { type: 'application/json' });
-    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `faith-personal-backup-${todayStr()}.json`; a.click();
+    const json = JSON.stringify({ app: 'Faith Personal', v: s.v, salt: s.salt, iv: s.iv, ct: s.ct });
+    const name = `faith-personal-backup-${todayStr()}.json`;
+    const C = window.Capacitor;
+    if (C && C.isNativePlatform && C.isNativePlatform()) {
+      // Android app: save the file, then open the share sheet (Drive, WhatsApp, Files...)
+      try {
+        const { Filesystem, Share } = C.Plugins;
+        const r = await Filesystem.writeFile({ path: name, data: json, directory: 'CACHE', encoding: 'utf8' });
+        await Share.share({ title: 'Faith Personal Backup', text: 'Faith Personal backup file', files: [r.uri], dialogTitle: 'Backup kahan save karna hai?' });
+      } catch (err) { if (!/cancel/i.test(String(err && err.message))) alert('Backup share nahi ho paya: ' + (err && err.message || err)); }
+      return;
+    }
+    const blob = new Blob([json], { type: 'application/json' });
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; a.click();
     setTimeout(() => URL.revokeObjectURL(a.href), 1500); toast('Backup download ho gaya ✓');
   };
   $('importBtn').onclick = () => $('importFile').click();
@@ -776,7 +788,7 @@
   if (!window.crypto || !crypto.subtle) {
     document.body.innerHTML = '<div style="padding:40px 20px;text-align:center">Ye browser secure encryption support nahi karta.<br>Chrome ya Safari ka latest version use karo.</div>';
   } else show('splash');
-  if ('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('sw.js').catch(() => {});
+  if ('serviceWorker' in navigator && location.protocol.startsWith('http') && !window.Capacitor) navigator.serviceWorker.register('sw.js').catch(() => {});
 })();
 </script>
 </body>

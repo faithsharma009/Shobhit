@@ -1,0 +1,18 @@
+{
+  "name": "faith-personal",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Faith Personal: trading profit/loss journal and password vault",
+  "scripts": {
+    "build:web": "rm -rf www && mkdir -p www && cp -r index.html manifest.json icons www/"
+  },
+  "dependencies": {
+    "@capacitor/android": "6.2.3",
+    "@capacitor/core": "6.2.3",
+    "@capacitor/filesystem": "6.0.4",
+    "@capacitor/share": "6.0.4"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "6.2.3"
+  }
+}
