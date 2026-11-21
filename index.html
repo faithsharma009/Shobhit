@@ -87,7 +87,7 @@
   .sec .link { font-size: 13px; }
   .greet { margin: 4px 2px 14px; }
   .greet small { color: var(--muted); font-size: 13px; }
-  .greet div { font-size: 22px; font-weight: 800; letter-spacing: -.4px; margin-top: 2px; }
+  .greet div { font-size: 24px; font-weight: 800; letter-spacing: -.4px; margin-top: 2px; }
 
   .hero { border-radius: 22px; padding: 18px 18px 0; position: relative; overflow: hidden;
     background: radial-gradient(120% 120% at 100% 0%, #9333ea 0%, #6d28d9 38%, #3b0f86 100%); box-shadow: 0 16px 36px rgba(91,33,182,.38); }
@@ -548,12 +548,11 @@
   function homeHTML() {
     const ym = thisYM(), m = monthTotals(ym);
     const totalP = sum(data.trades), totalS = sum(data.savings), totalE = sum(data.expenses);
-    const hr = new Date().getHours(), hi = hr < 12 ? 'Good Morning' : hr < 17 ? 'Good Afternoon' : 'Good Evening';
     const months = [...new Set([ym, ...[...data.trades, ...data.savings, ...data.expenses].map(x => x.date.slice(0, 7))])].sort().reverse();
     const recent = [...data.savings.map(x => ({ ...x, k: 'saving' })), ...data.expenses.map(x => ({ ...x, k: 'expense' }))].sort(byNewest).slice(0, 6);
     later(() => drawSpark($('hSpark')));
     return `<div class="page">
-      <div class="greet"><small>${hi} 👋</small><div>${monthName(ym)}</div></div>
+      <div class="greet"><div>Hello Faith 👋</div></div>
       <div class="hero">
         <div class="lbl">Total Trading Profit</div>
         <div class="big num" style="color:${totalP < 0 ? '#fecdd3' : '#fff'}">${money(totalP)}</div>
